@@ -88,12 +88,14 @@ create table disc_props_t (
   props_id_c,
   -- Most by staff & author changeable things from pages3?
 
+  -- No, these should be in  pages_t:  --------
   pin_where_c,
   pin_order_c,
 
   answered_by_id_c,
   planned_by_id_c,
   started_by_id_c,
+  ---------------------------------------------
 
   orig_post_reply_btn_title  text.  -- max len?
   orig_post_votes            int,
