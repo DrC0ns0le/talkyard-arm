@@ -22,6 +22,7 @@
 /// <reference path="../notification/notf-prefs-button.ts" />
 /// <reference path="../widgets.ts" />
 /// <reference path="../oop-methods.ts" />
+/// <reference path="../widgets/widget-open-buttons.ts" />
 
 //------------------------------------------------------------------------------
    namespace debiki2.page {
@@ -115,6 +116,23 @@ export var Metabar = createComponent({
               r.li({ className: 'dw-cmts-count' },
                 page.numRepliesVisible + ' ' + (
                     isBlogComments ? (t.comments || t.replies) : t.replies)),  // I18N t.comments missing
+              r.li({},
+                widgets.DiscLayoutDropdownBtn({ page, store,
+                    onSelect: (newLayout: DiscLayout) => {
+                      // This'll change the layout in this browser only (not saved server side).
+                      ReactActions.patchTheStore({
+                        curPageTweaks: { tempProps: newLayout },
+                      });
+                    } })),
+                /*
+                Button({ onClick: (event) => {
+                  const atRect = cloneEventTargetRect(event);
+                  pagedialogs.openDiscLayoutDiag({ atRect,
+                      layout: page, // { comtOrder: ComtOrder.BestFirst, comtNesting: 1 },
+                      saveFn: (emailPref: EmailNotfPrefs) => {
+                        //this.setState({ emailPref });
+                      } });
+                }}, "Sort how")), */
               nameLoginBtns,
               r.li({}, notfLevelElem)),
           toggleDetailsBtn);

@@ -758,7 +758,7 @@ interface StaffTours {
 
 type Category = Cat; // Too long name!
 
-interface Cat {
+interface Cat extends DiscLayout {
   id: CategoryId;
   parentId?: CategoryId;  // RENAME to parCatId? simpler to grep and [concice_is_nice].
   sectionPageId?: any; // only when saving to server?   // RENAME to ixPgId? (index page id)
@@ -964,7 +964,7 @@ interface Page
     // So we can see from where a setting comes — is it from some ancestor category
     // or group? Or the whole forum? Otherwise, hard to troubleshoot unexpected
     // effective settings.
-    extends TopicInterfaceSettings {
+    extends TopicInterfaceSettings, DiscLayout {
   dbgSrc: string;
   pageId: PageId;
   pageVersion: PageVersion;
@@ -976,8 +976,13 @@ interface Page
   externalBacklinks?: LinkTitleUrl[];
   pageRole: PageRole;
   pagePath: PagePath;
+
+  // If changing some props temporarily, in the browser only.
+  tempProps: DiscLayout;
   //--------
-  pageLayout?: PageLayout;  // REMOVE, move to TopicInterfaceSettings
+  pageLayout?: PageLayout;  // REMOVE, move to TopicInterfaceSettings,
+                            // no, let's have Page and Cat extend DiscLayout
+                            // instead — done, see above.
       // Or rather, split into different objs and fields [disc_props_view_stats] [PAGETYPESETTNG]
   forumSearchBox?: ShowSearchBox;
   forumMainView?: Nr;
@@ -1255,19 +1260,28 @@ interface SettingsVisibleClientSide extends TopicInterfaceSettings {
 }
 
 
-// interface ForumInterfaceSettings {   — move some things from above to here?
-// ...
-// }
+// Move some things from above to DiscLayout?
+//
+// Currently configured for all categories, and(optionally) per category and page.
+// Maybe later: disc_layout_t.
+interface DiscLayout {
+  comtOrder?: PostSortOrder; //ComtOrder;
+  comtNesting?: Nr;
+}
+
 
 
 interface TopicInterfaceSettings {
+  // --- Hmm these will be in DiscLayout instead: ------
   discussionLayout?: DiscussionLayout;  // default: threaded
   discPostNesting?: NestingDepth;       // default: infinite nesting depth
   discPostSortOrder?: PostSortOrder;    // default: oldest first
+  // ---------------------------------------------------
 
+  // And this is deprecated:
   progressLayout?: ProgressLayout;      // default: Visible
 
-  // Currently for embedded comments: (later, per page type?)
+  // Currently for embedded comments: (later, can configure in disc_props_t.)
   origPostReplyBtnTitle?: string;       // default: t.AddComment
   origPostVotes?: OrigPostVotes;
 
@@ -1293,7 +1307,7 @@ interface PagePath {
 }
 
 
-interface Ancestor {  // server side: [6FK02QFV]
+interface Ancestor {  // server side: [6FK02QFV].
   categoryId: number;
   title: string;
   path: string;
@@ -2176,6 +2190,21 @@ interface TagDiagProps {
 }
 
 
+interface DiscLayoutDropdownBtnProps {
+  page: Page;
+  store: Store;
+  onSelect: (newLayout: DiscLayout) => Vo;
+}
+
+
+interface DiscLayoutDiagState {
+  atRect: Rect;
+  layout: DiscLayout;
+  default: DiscLayout;
+  onSelect: (newLayout: DiscLayout) => Vo ;
+}
+
+
 interface ExplainingTitleText {
   iconUrl?: St;
   title: St;
@@ -2432,7 +2461,7 @@ interface ResponseObj {
 }
 
 
-interface EditPageRequestData {
+interface EditPageRequestData extends DiscLayout {
     //pageId: PageId; — filled in By Server.ts
     newTitle?: string;
     categoryId?: CategoryId;

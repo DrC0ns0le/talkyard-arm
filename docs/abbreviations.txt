@@ -101,7 +101,7 @@ C,
 Cat = category
 Cb  = Contextbar
 CB  = checkbox, e.g. s_SthCB
-Cm, Cmt = comment
+Cm, Cmt, Comt = comment
 Co, Col = column, Rw or Row = row
 Cr  = create
 Cu  = Custom, e.g. CuNav = custom navigation links

@@ -167,6 +167,8 @@ object PageMeta {
   * @param forumMainView: 1 for topics, 2 for cats.
   * @param forumCatsTopics: 1 for cats only, 2 for cats to the left, and active & popular
   *   to the right.
+  * @param comtOrder — default is None, meaning, the setting of the parent category.
+  * @param comtNesting
   * @param numLikes
   * @param numWrongs
   * @param numBurys
@@ -216,6 +218,8 @@ case class PageMeta( // ?RENAME to Page? And rename Page to PageAndPosts?  [exp]
   // -----
   // REFACTOR move to disc_views_t   [disc_props_view_stats]  [PAGETYPESETTNG]
   layout: PageLayout = PageLayout.Default,
+  comtOrder: Opt[PostSortOrder] = None,
+  comtNesting: Opt[ComtNesting_later] = None,
   forumSearchBox: Opt[i32] = None,
   forumMainView: Opt[i32] = None,
   forumCatsTopics: Opt[i32] = None,
@@ -1044,4 +1048,59 @@ case class PagePostNr(pageId: PageId, postNr: PostNr) {
 
 case class PagePostNrId(pageId: PageId, postNr: PostNr, postId: PostId) {
 }
+
+
+
+/*
+sealed abstract class ComtSortOrder(val IntVal: i32) { def toInt: i32 = IntVal }
+
+object ComtSortOrder {
+  // (A nibble is 4 bits: 0x00 – 0xff.)
+  private val InheritNibble = 0x00
+  private val OldestFirstNibble = 0x01
+  private val NewestFirstNibble = 0x02
+  private val BestFirstNibble = 0x03
+  // Trending — but what time period? That could be a separate field, see [TrendingPeriod].
+  private val TrendingFirstNibble = 0x04
+  // Also: ControversialFirst — both many Likes and Disagrees
+  //       ProblematicFirst  — for mods, to see flagged and unwanted things first
+
+  //case object Inherit extends ComtSortOrder(InheritNibble)
+  case object OldestFirst extends ComtSortOrder(OldestFirstNibble)
+  case object NewestFirst extends ComtSortOrder(NewestFirstNibble)
+  case object BestFirst extends ComtSortOrder(BestFirstNibble)
+  case object TrendingFirst extends ComtSortOrder(TrendingFirstNibble)
+  case object NewestThenBestFirst extends ComtSortOrder(NewestFirstNibble + (BestFirstNibble << 4))
+  case object BestThenNewestFirst extends ComtSortOrder(BestFirstNibble + (NewestFirstNibble << 4))
+
+  val Default: ComtSortOrder = OldestFirst
+
+  /*
+  def clearOrFirstOf(a: Opt[ComtSortOrder], b: Opt[ComtSortOrder]): Opt[ComtSortOrder] = {
+    if (a is Inherit) None  // clears it
+    else a orElse b
+  }
+
+  val ZeroClear = 0
+
+  def newFromOptVal(anyValue: Opt[i32]): Opt[Opt[ComtSortOrder]] = {
+    if (anyValue is ZeroClear) Some(None)
+    else {
+      val order = fromOptVal(anyValue)
+      order.map(Some(_))
+    }
+  } */
+
+  def fromOptVal(anyValue: Opt[i32]): Opt[ComtSortOrder] = anyValue map {
+    // case Inherit.IntVal => Inherit
+    case OldestFirst.IntVal => OldestFirst
+    case NewestFirst.IntVal => NewestFirst
+    case BestFirst.IntVal => BestFirst
+    case TrendingFirst.IntVal => TrendingFirst
+    case NewestThenBestFirst.IntVal => NewestThenBestFirst
+    case BestThenNewestFirst.IntVal => BestThenNewestFirst
+    case _ => return None
+  }
+
+} */
 

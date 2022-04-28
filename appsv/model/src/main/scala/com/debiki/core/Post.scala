@@ -368,6 +368,7 @@ case class Post(   // [exp] ok use
   deletedStatus: DeletedStatus,
   deletedAt: Option[ju.Date],
   deletedById: Option[UserId],
+  indexPrio: Opt[IndexPrio] = None,
   pinnedPosition: Option[Int],
   branchSideways: Option[Byte],
   numPendingFlags: Int,
@@ -450,6 +451,7 @@ case class Post(   // [exp] ok use
   require(bodyHiddenAt.isDefined == bodyHiddenById.isDefined, "DwE0B7I3")
   require(bodyHiddenReason.isEmpty || bodyHiddenAt.isDefined, "DwE3K5I9")
 
+  require(indexPrio.isEmptyOr(IndexDePrioPage), "TyE05MERKGJ256")
   require(numDistinctEditors >= 0, "DwE2IkG7")
   require(numPendingEditSuggestions >= 0, "DwE0IK0P3")
   require(numPendingFlags >= 0, "DwE4KIw2")

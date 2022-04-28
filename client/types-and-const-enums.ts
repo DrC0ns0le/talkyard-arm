@@ -441,13 +441,24 @@ const enum DiscussionLayout {
 type NestingDepth = number;
 const InfiniteNesting: NestingDepth = -1;  // sync with Scala
 
-const enum PostSortOrder {
+/// The 1st nibble says how replies to the orig post should be sorted,
+/// the 2nd nibble says how to sort replies to replies (depth 2),
+/// the 3rd nibble  says how to sort replies to replies to replies.
+/// If 0 (unspecified), then, the prev nibble is used instead.
+/// If all 0, then, any sort order specified in the ancestor cats,
+/// is used, and if unspecified there too, then, the site settings,
+/// or OldestFirst if unspecified everywhere.
+///
+const enum PostSortOrder {  // rename to ComtSortOrder? Since not for orig post and title post.
   Default = 0,
   BestFirst = 1,
   NewestFirst = 2,
   OldestFirst = 3,
-  // Random = 4 ?
-  // NewAndBestFirst = 5,
+  NewestThenBestFirst = NewestFirst + (BestFirst << 4),
+  //Random = _
+  //ControversialFirst = _,
+  //TrendingFirst = _,
+  //ProblematicFirst = _,
 }
 
 const enum ProgressLayout {

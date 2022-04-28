@@ -88,6 +88,8 @@ const ChangePageDialog = createComponent({
     let setDoneListItem;
     let changeCategoryListItem;
     let changeTopicTypeListItem;
+    let changeComtOrderListItem;
+    let changeComtNestingListItem;;
     let closeListItem;
     let reopenListItem;
     let deletePageListItem;
@@ -179,6 +181,15 @@ const ChangePageDialog = createComponent({
                 onSelect: (newType: PageRole) => {
                   savePage({ pageRole: newType });
                 }})));
+
+      changeComtOrderListItem = !isStaff(me) ? null : rFr({},
+          r.div({ className: 's_ExplDrp_Ttl' }, "Comment sort order:"),
+          r.div({ className: 's_ExplDrp_ActIt' },
+            pagedialogs.DiscLayoutDropdownBtn({ page, onSelect: (newLayout) => {
+                  savePage(newLayout);
+                }})));
+
+      changeComtNestingListItem = null;  // later
 
       // Show a Close button for unanswered questions and not-yet-done ideas/problems,
       // and a Reopen button if closed already.

@@ -1062,7 +1062,27 @@ export function store_findCatByRefOrId(store: Store, refOrId: RefOrId): Category
 }
 
 
+/// Getting the current cat first in the ancestor cats list, is good
+/// when deriving page properties — then we start with the most
+/// specific thing (the page), and continue "upwards" to less specific
+/// things: the parent cat, grandparent, the root cat,
+/// and finally the whole site settings.
+///
+export function store_ancestorCatsCurFirst(store: Store, catId: CatId): Cat[] {
+  return store_ancestorCatsImpl(store, catId, false);
+}
+
+
+/// Getting the root cat and base cat first in the ancestor cats list,
+/// is good when looking at permissions — because if there's something pat
+/// may not access, we shouldn't look into its descendants (sub cats).
+///
 export function store_ancestorCatsCurLast(store: Store, categoryId: CatId): Cat[] {
+  return store_ancestorCatsImpl(store, categoryId, true);
+}
+
+
+function store_ancestorCatsImpl(store: Store, categoryId: CatId, curLast: Bo): Cat[] {
   const ancestors = [];
   const cats: Category[] = store.currentCategories;
   let nextCatId = categoryId;
@@ -1080,7 +1100,12 @@ export function store_ancestorCatsCurLast(store: Store, categoryId: CatId): Cat[
       // @endif
       break;
     }
-    ancestors.unshift(nextCat);
+    if (curLast) {
+      ancestors.unshift(nextCat);
+    }
+    else {
+      ancestors.push(nextCat);
+    }
     nextCatId = nextCat.parentId;
     if (!nextCatId)
       break;
@@ -1512,6 +1537,41 @@ let numTagTypeMissingWarnings = 0;
 // Page
 //----------------------------------
 
+/// Effective properties. For each unspecified page field, e.g. sort order,
+/// looks at the ancestor categories, to find out what value to use.
+/// And if unspecified everywhere, uses the global site settings.
+///
+export function page_effProps(page: Page, store: Store): Page {
+  let effProps = { ...page, ...page.tempProps };
+
+  // Start with the parent cat, since it's the most specific cat. Then the
+  // grandparent, and so on. Finally, the whole site settings.
+
+  // These: page.ancestorsRootFirst  don't include the comtOrder etc fields.
+  // Maybe they should? For now, call this fn instead:
+  const ancCats: Cat[] = store_ancestorCatsCurFirst(store, page.categoryId);
+
+  for (const cat of ancCats) {
+    if (!effProps.comtOrder) {
+      effProps.comtOrder = cat.comtOrder;
+    }
+    if (!effProps.comtNesting) {
+      effProps.comtNesting = cat.comtNesting;
+    }
+    // More ...
+  }
+
+  /*
+  // Lastly, site wide settings.
+  if (!effProps.comtOrder) {
+    //effProps.comtOrder = store.settings.discPostSortOrder;  // hmm
+  }
+  if (!effProps.comtNesting) {
+    effProps.comtNesting = store.settings.discPostNesting;  // orig post at 0 in both?
+  } */
+
+  return effProps;
+}
 
 export function page_authorId(page: Page): PatId | U {
   const origPost = page.postsByNr[BodyNr];

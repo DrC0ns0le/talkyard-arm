@@ -926,6 +926,8 @@ function updatePost(post: Post, pageId: PageId, isCollapsing?: boolean) {
   // Add or update the post itself.
   page.postsByNr[post.nr] = post;
 
+  const pageEffProps = page_effProps(page, store);
+
   // In case this is a new post, update its parent's child id list.
   const parentPost = page.postsByNr[post.parentNr];
   if (parentPost) {
@@ -939,7 +941,9 @@ function updatePost(post: Post, pageId: PageId, isCollapsing?: boolean) {
         childNrsSorted.push(post.nr);
       }
       sortPostNrsInPlace(
-            childNrsSorted, page.postsByNr, page.discPostSortOrder);
+            childNrsSorted, page.postsByNr,
+            pageEffProps.comtOrder);
+         // page.discPostSortOrder
     }
   }
 
@@ -960,7 +964,8 @@ function updatePost(post: Post, pageId: PageId, isCollapsing?: boolean) {
   if (!post.parentNr && post.nr != BodyNr && post.nr !== TitleNr) {
     page.parentlessReplyNrsSorted = findParentlessReplyIds(page.postsByNr);
     sortPostNrsInPlace(
-        page.parentlessReplyNrsSorted, page.postsByNr, page.discPostSortOrder);
+        page.parentlessReplyNrsSorted, page.postsByNr, pageEffProps.comtOrder);
+                                                    // page.discPostSortOrder);
   }
 
   rememberPostsToQuickUpdate(post.nr);
@@ -1242,7 +1247,7 @@ function findParentlessReplyIds(postsByNr): number[] {
  * NOTE: Keep in sync with  sortPosts(posts, sortOrder)   [SAMESORT]
  * in modules/debiki-core/src/main/scala/com/debiki/core/Post.scala
  */
-function sortPostNrsInPlace(postNrs: PostNr[], postsByNr: { [nr: number]: Post },
+function sortPostNrsInPlace(postNrs: PostNr[], postsByNr: { [nr: number]: Post },  // sss
       postSortOrder: PostSortOrder | U) {
   switch (postSortOrder || PostSortOrder.Default) {
     case PostSortOrder.BestFirst:

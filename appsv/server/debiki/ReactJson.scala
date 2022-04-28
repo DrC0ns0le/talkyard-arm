@@ -328,6 +328,7 @@ class JsonMaker(dao: SiteDao) {
 
     val numPostsExclTitle = numPosts - (if (pageParts.titlePost.isDefined) 1 else 0)
 
+    // Oops, sort by page.meta.comtOrder:
     val parentlessReplyNrsSorted =
       pageParts.parentlessRepliesSorted.map(reply => JsNumber(reply.nr))
 
@@ -337,6 +338,7 @@ class JsonMaker(dao: SiteDao) {
           embeddedCommentsDummyRootPost(parentlessReplyNrsSorted)
     }
 
+    // Always by time? Never by page.meta.comtOrder?
     val progressPostNrsSorted =
       pageParts.progressPostsSorted.map(reply => JsNumber(reply.nr))
 
@@ -408,6 +410,8 @@ class JsonMaker(dao: SiteDao) {
       "pagePath" -> JsPagePathWithId(pagePath),
       // --- These and some more, could be in separate objs instead [DBLINHERIT]
       "pageLayout" -> JsNumber(page.meta.layout.toInt),
+      "comtOrder" -> JsNum32OrNull(page.meta.comtOrder.map(_.toInt)),
+      //"comtNesting" -> later
       "forumSearchBox" -> JsNum32OrNull(page.meta.forumSearchBox),
       "forumMainView" -> JsNum32OrNull(page.meta.forumMainView),
       "forumCatsTopics" -> JsNum32OrNull(page.meta.forumCatsTopics),
