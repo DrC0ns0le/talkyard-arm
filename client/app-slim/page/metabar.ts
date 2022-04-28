@@ -117,22 +117,13 @@ export var Metabar = createComponent({
                 page.numRepliesVisible + ' ' + (
                     isBlogComments ? (t.comments || t.replies) : t.replies)),  // I18N t.comments missing
               r.li({},
-                widgets.DiscLayoutDropdownBtn({ page, store,
+                widgets.DiscLayoutDropdownBtn({ page, store, usePageTweaks: UseTweaks.Yes,
                     onSelect: (newLayout: DiscLayout) => {
                       // This'll change the layout in this browser only (not saved server side).
                       ReactActions.patchTheStore({
-                        curPageTweaks: { tempProps: newLayout },
+                        curPageTweaks: newLayout, // { tempProps: newLayout },
                       });
                     } })),
-                /*
-                Button({ onClick: (event) => {
-                  const atRect = cloneEventTargetRect(event);
-                  pagedialogs.openDiscLayoutDiag({ atRect,
-                      layout: page, // { comtOrder: ComtOrder.BestFirst, comtNesting: 1 },
-                      saveFn: (emailPref: EmailNotfPrefs) => {
-                        //this.setState({ emailPref });
-                      } });
-                }}, "Sort how")), */
               nameLoginBtns,
               r.li({}, notfLevelElem)),
           toggleDetailsBtn);

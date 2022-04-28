@@ -585,6 +585,11 @@ const enum HostRole {
 }
 
 
+const enum UseTweaks {
+  No = 0,  // 0 instead of false
+  Yes = 1, // 1 instead of true
+}
+
 const enum Sizes {
   Kilobyte = 1000,   // kB
   Kibibyte = 1024,   // KiB

@@ -254,12 +254,26 @@ ReactDispatcher.register(function(payload) {
       const parent: Ancestor = <Ancestor> _.last(action.newAncestorsRootFirst);
       currentPage.categoryId = parent ? parent.categoryId : null;
       const was2dTree = currentPage.horizontalLayout;
+
+      const pageEffPropsBefore = page_effProps(currentPage, store, UseTweaks.Yes);
+
       currentPage.pageRole = newMeta.pageType;
       currentPage.doingStatus = newMeta.doingStatus;
       currentPage.pagePlannedAtMs = newMeta.plannedAt;
       currentPage.pageStartedAtMs = newMeta.startedAt;
       currentPage.pageDoneAtMs = newMeta.doneAt;
       currentPage.pageClosedAtMs = newMeta.closedAt;
+
+      //const newOrder = firstDefinedOf(store.curPageTweaks?.comtOrder, newMeta.comtOrder);
+      //const changesComtSortOrder = isDefButNot(newOrder, currentPage.comtOrder);
+
+      const pageEffPropsAfter = page_effProps(currentPage, store, UseTweaks.Yes);
+
+      currentPage.comtOrder = newMeta.comtOrder;
+      currentPage.comtNesting = newMeta.comtNesting;
+      if (pageEffPropsAfter.comtOrder !== pageEffPropsBefore.comtOrder) {  // or max nesting
+        store_relayoutPageInPlace(store, currentPage, pageEffPropsAfter);
+      }
 
       // [2D_LAYOUT]
       //currentPage.horizontalLayout = action.newPageRole === PageRole.MindMap || currentPage.is2dTreeDefault;
@@ -926,7 +940,7 @@ function updatePost(post: Post, pageId: PageId, isCollapsing?: boolean) {
   // Add or update the post itself.
   page.postsByNr[post.nr] = post;
 
-  const pageEffProps = page_effProps(page, store);
+  const pageEffProps = page_effProps(page, store, UseTweaks.Yes);
 
   // In case this is a new post, update its parent's child id list.
   const parentPost = page.postsByNr[post.parentNr];
@@ -1240,6 +1254,16 @@ function findParentlessReplyIds(postsByNr): number[] {
     }
   });
   return ids;
+}
+
+
+
+function store_relayoutPageInPlace(store, page, layout: DiscLayout) {
+  // ?
+  _.each(page.postsByNr, (post: Post) => {
+    sortPostNrsInPlace(
+          post.childNrsSorted, page.postsByNr, layout.comtOrder);
+  });
 }
 
 
@@ -1619,10 +1643,15 @@ function patchTheStore(storePatch: StorePatch) {  // REFACTOR just call directly
 
   const currentPage: Page | U = store.currentPage;
 
+  let changesComtSortOrder: U | Bo;
+
   if (!currentPage) {
     delete store.curPageTweaks;
   }
   else if (storePatch.curPageTweaks) {
+    const patchTweaks = storePatch.curPageTweaks;
+    //if (patchTweaks.comtOrder && patchTweaks.comtOrder !== store.curPageTweaks.comtOrder) {
+    changesComtSortOrder = isDef(storePatch.curPageTweaks.comtOrder);
     store.curPageTweaks = {
       ...store.curPageTweaks,
       ...storePatch.curPageTweaks,
@@ -1702,6 +1731,10 @@ function patchTheStore(storePatch: StorePatch) {  // REFACTOR just call directly
       });
     });
   });
+
+  if (changesComtSortOrder) {
+    store_relayoutPageInPlace(store, currentPage, storePatch.curPageTweaks);
+  }
 
   // Update the current page.
   if (!storePatch.pageVersionsByPageId) {

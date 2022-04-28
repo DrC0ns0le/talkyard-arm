@@ -40,14 +40,14 @@ export const DiscLayoutDropdownBtn = React.createFactory<DiscLayoutDropdownBtnPr
     comtNesting: props.page.comtNesting,
   };
 
-  const effLayout = page_effProps(props.page, props.store);
+  const effLayout = page_effProps(props.page, props.store, props.usePageTweaks);
 
   return (
-      Button({ onClick: (event) => {
+      Button({ className: 'esTopicType_dropdown', onClick: (event) => {
         const atRect = cloneEventTargetRect(event);
         morebundle.openDiscLayoutDiag({
               atRect, layout: pageLayoutProps, default: effLayout, onSelect: props.onSelect });
-      }}, comtOrder_title(effLayout.comtOrder)));
+      }}, comtOrder_title(effLayout.comtOrder), ' ', r.span({ className: 'caret' })));
 });
 
 

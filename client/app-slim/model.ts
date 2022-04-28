@@ -1060,6 +1060,8 @@ interface PageMeta {
   authorId: UserId;
   frequentPosterIds: number[];
   layout: PageLayout;
+  comtOrder?: PostSortOrder;   // right?
+  comtNesting?: NestingDepth;   // right?
   pinOrder?: number;
   pinWhere?: PinPageWhere;
   numLikes: number;
@@ -2192,6 +2194,7 @@ interface TagDiagProps {
 
 interface DiscLayoutDropdownBtnProps {
   page: Page;
+  usePageTweaks?: UseTweaks;
   store: Store;
   onSelect: (newLayout: DiscLayout) => Vo;
 }

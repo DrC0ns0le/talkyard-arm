@@ -185,7 +185,11 @@ const ChangePageDialog = createComponent({
       changeComtOrderListItem = !isStaff(me) ? null : rFr({},
           r.div({ className: 's_ExplDrp_Ttl' }, "Comment sort order:"),
           r.div({ className: 's_ExplDrp_ActIt' },
-            pagedialogs.DiscLayoutDropdownBtn({ page, onSelect: (newLayout) => {
+            widgets.DiscLayoutDropdownBtn({ page, store,
+                // Don't show [temp sort order changes ("tweaks") done in this browser]
+                // — instead, now, we're saving server side, for everyone.
+                usePageTweaks: UseTweaks.No,
+                onSelect: (newLayout: DiscLayout) => {
                   savePage(newLayout);
                 }})));
 

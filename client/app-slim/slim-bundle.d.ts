@@ -514,6 +514,11 @@ declare namespace debiki2 {
     const Email;
   }
 
+  namespace widgets {
+    function DiscLayoutDropdownBtn(props: DiscLayoutDropdownBtnProps);
+    // const DiscLayoutDropdownBtn = React.createFactory<DiscLayoutDropdownBtnProps>(
+  }
+
   var SelectCategoryDropdown: any;
 
   // From widgets.ts:

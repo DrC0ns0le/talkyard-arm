@@ -1094,9 +1094,14 @@ function store_ancestorCatsImpl(store: Store, categoryId: CatId, curLast: Bo): C
       // json sent to the browser, so we won't find the root cat. However
       // the root cat's id should be one of the SiteSection's root cat ids.
       // @ifdef DEBUG
+      /*  need to update warmup json
       const siteSection = _.find(store.siteSections, s => s.rootCategoryId === nextCatId);
-      dieIf(!siteSection, `No site section root cat found for cat ${categoryId}, ` +
-          `root cat id ${nextCatId} [TyE036RKTHF2]`);
+      dieIf(!siteSection, `No site section root cat found for cat ${categoryId},` +
+          `\n   root cat id: ${nextCatId} [TyE036RKTHF2]` +
+          `\n   site sections: ${JSON.stringify(store.siteSections)}` +
+          `\n   ancestor cats found: ${JSON.stringify(ancestors)}` +
+          `\n   store.currentCategories: ${JSON.stringify(store.currentCategories)}`);
+          */
       // @endif
       break;
     }
@@ -1541,8 +1546,11 @@ let numTagTypeMissingWarnings = 0;
 /// looks at the ancestor categories, to find out what value to use.
 /// And if unspecified everywhere, uses the global site settings.
 ///
-export function page_effProps(page: Page, store: Store): Page {
-  let effProps = { ...page, ...page.tempProps };
+export function page_effProps(page: Page, store: Store, usePageTweaks: UseTweaks): Page {
+  const anyTweaks = usePageTweaks && page.pageId === store.currentPageId ?
+          store.curPageTweaks : undefined;
+
+  let effProps = { ...page }; //, ...anyTweaks };   //, ...page.tempProps };
 
   // Start with the parent cat, since it's the most specific cat. Then the
   // grandparent, and so on. Finally, the whole site settings.
@@ -1570,6 +1578,9 @@ export function page_effProps(page: Page, store: Store): Page {
     effProps.comtNesting = store.settings.discPostNesting;  // orig post at 0 in both?
   } */
 
+  if (anyTweaks) {
+    effProps = { ...effProps, ...anyTweaks };
+  }
   return effProps;
 }
 
