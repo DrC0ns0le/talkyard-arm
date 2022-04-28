@@ -280,6 +280,8 @@ const ChangePageDialog = createComponent({
         closeListItem,
         deletePageListItem,
         undeletePageListItem,
+        // Almost never used, could be hidden behind an Advnced button?:
+        changeComtOrderListItem,
         ));
   }
 });
