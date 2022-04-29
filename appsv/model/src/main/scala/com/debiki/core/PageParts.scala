@@ -136,7 +136,7 @@ abstract class PageParts {
   def enableDisagreeVote: Bo = true
 
   private lazy val childrenSortedByParentNr: collection.Map[PostNr, immutable.Seq[Post]] = {
-    // COULD find out how to specify the capacity?
+    COULD_OPTIMIZE // specify the capacity, both the sibling arrays and the map But how?
     val childMap = mutable.HashMap[PostNr, Vector[Post]]()
     for {
       post <- allPosts
@@ -148,6 +148,7 @@ abstract class PageParts {
       siblings = siblings :+ post
       childMap.put(parentNrOrNoNr, siblings)
     }
+    // Incl depth — and pass the whole postsOrderNesting.
     childMap.mapValues(posts => Post.sortPosts(posts, postsOrderNesting.sortOrder))
   }
 

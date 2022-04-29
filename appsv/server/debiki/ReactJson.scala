@@ -643,7 +643,7 @@ class JsonMaker(dao: SiteDao) {
   /** Private, so it cannot be called outside a transaction.
     */
   private def postToJsonImpl(post: Post, page: Page, tagsAndBadges: TagsAndBadges,
-        includeUnapproved: Bo, showHidden: Bo): JsObject = {
+        includeUnapproved: Bo, showHidden: Bo, site: SiteBrief): JsObject = {
 
     val depth = page.parts.depthOf(post.nr)
 
