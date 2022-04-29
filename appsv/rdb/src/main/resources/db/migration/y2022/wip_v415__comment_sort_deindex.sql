@@ -1,4 +1,8 @@
 
+-- cats? SquashSiblingIndexLimit
+-- or SummarizeNumRepliesVisibleLimit
+-- Feature flag
+
 
 -- Later, instead in: disc_view_t, see [disc_props_view_stats]
 alter table pages3      add column comt_order_c i32_d;
