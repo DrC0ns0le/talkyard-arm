@@ -178,8 +178,8 @@ package object core {
     * 1 means no nesting, like in phpBB and Discourse.
     * If unspecified, then, unlimited nesting depth.
     */
-  type ComtNesting_later = i16  // for now
-  val ComtNestingDefaultInherit_later: ComtNesting_later = 0.toShort
+  type ComtNesting_later = NestingDepth  // for now // oops use  NestingDepth  instead?
+  val ComtNestingDefaultInherit_later: ComtNesting_later = -1 // later?: 0.toShort
 
   REFACTOR // change page id to Int (not String) — is always an Int anyway,
   // except for the forum main page at Ty .io.
@@ -1073,7 +1073,7 @@ package object core {
     // Also: ControversialFirst — both many Likes and Disagrees
     //       ProblematicFirst  — for mods, to see flagged and unwanted things first
 
-    case object Default extends PostSortOrder(0, false)
+    case object Default extends PostSortOrder(0, false) // change to OldestFirst?
     case object BestFirst extends PostSortOrder(BestFirstNibble, false)
     case object NewestFirst extends PostSortOrder(NewestFirstNibble, true)
     case object OldestFirst extends PostSortOrder(OldestFirstNibble, true)

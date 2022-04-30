@@ -93,17 +93,27 @@ create table sect_props_t (  -- or: forum_props_t?
   def_page_score_period_c      trending_period_d,
   do_vote_style_c         do_vote_style_d,
   do_vote_in_topic_list_c bool
+
+  -- If is a wiki, wiki props would be here, right?
+  -- I think there wouldn't be a separate wiki_props_t.
+  -- Or if is a blog, there wouldn't be a blog_props_t — instead,
+  -- any such props would be here in sect_props_t.
+  -- And knowledge base props, e.g. "index squares" layout,
+  -- also would be in this table.
 );
 
 create table sect_view_t (
   -- ...
+  forumSearchBox: Opt[i32] = None,
+  forumMainView: Opt[i32] = None,
+  forumCatsTopics: Opt[i32] = None,
 );
 
 create table sect_stats_t (
   -- ...
 );
 
-create table disc_props_t (
+create table disc_props_t (   -- Scala:  DiscProps
   site_id,
   props_id_c,
   -- Most by staff & author changeable things from pages3
@@ -114,10 +124,12 @@ create table disc_props_t (
   orig_post_reply_btn_title  text.  -- max len?
   orig_post_votes            int,
   enable_disagree_vote_c
+  ...other-votes-&-reactions...
   ...
 );
 
 -- or name it  disc_layout_t  instead?
+-- Or skip for now, incl in  disc_props_t  instead?  then, not configurable per pat.
 create table disc_view_t (   -- people can configure their own ~~view~~ layout (distant future)
   site_id,
   pat_id_c,  -- if someone's personal view. Default Everyone.Id
@@ -135,6 +147,9 @@ create table disc_view_t (   -- people can configure their own ~~view~~ layout (
   emb_comt_order_c           int,  -- or could be a nibble in comt_ordr?
   emb_comt_nesting_c         int,  -- this too?   And if nibble is 0, then
                                    -- use the not-embedded config.
+
+  SquashSiblingIndexLimit
+  SummarizeNumRepliesVisibleLimit
 );
 
 create table disc_stats_t (   -- updated automatically

@@ -121,7 +121,9 @@ case class Category(  // [exp] ok use   too long name! use Cat instead
   updatedAt: ju.Date,
   lockedAt: Option[ju.Date] = None,
   frozenAt: Option[ju.Date] = None,
-  deletedAt: Option[ju.Date] = None) {
+  deletedAt: Option[ju.Date] = None,
+  )
+  extends DiscPropsSource with SectPropsSource {
 
   import Category._
 
