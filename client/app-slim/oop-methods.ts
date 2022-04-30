@@ -717,6 +717,10 @@ export function pat_mayEditTags(me: Me, ps: { forPost?: Post, forPat?: Pat,
 //----------------------------------
 
 
+export function settings_pluckDiscProps(settings: SettingsVisibleClientSide) {
+}
+
+
 export function settings_showCategories(settings: SettingsVisibleClientSide, me: Myself) {
   // Later: by default, do as 'settings' say, but let user preferences override. [8WK4SD7]
   return settings.showCategories !== false;
@@ -1577,6 +1581,7 @@ export function page_effProps(page: Page, store: Store, usePageTweaks: UseTweaks
   if (!effProps.comtNesting) {
     effProps.comtNesting = store.settings.discPostNesting;  // orig post at 0 in both?
   } */
+  //effProps = { ...effProps, ...settings_pluckDiscProps(store.settings) };
 
   if (anyTweaks) {
     effProps = { ...effProps, ...anyTweaks };

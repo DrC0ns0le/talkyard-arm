@@ -976,9 +976,6 @@ interface Page
   externalBacklinks?: LinkTitleUrl[];
   pageRole: PageRole;
   pagePath: PagePath;
-
-  // If changing some props temporarily, in the browser only.
-  tempProps: DiscLayout;
   //--------
   pageLayout?: PageLayout;  // REMOVE, move to TopicInterfaceSettings,
                             // no, let's have Page and Cat extend DiscLayout
