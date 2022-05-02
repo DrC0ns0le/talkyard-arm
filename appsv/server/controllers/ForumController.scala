@@ -138,8 +138,8 @@ class ForumController @Inject()(cc: ControllerComponents, edContext: TyContext)
     // For now, do-it-votes just on or off:  [do_it_on_off]
     val doItVotesPopFirst = (categoryJson \ "doItVotesPopFirst").asOpt[Bo] getOrElse false
 
-    val anyComtOrder = PostSortOrder.fromOptVal(parseOptInt32(body, "comtOrder"))
-    val anyComtNesting = None // later: parseOptInt32(body, "comtNesting")
+    val anyComtOrder = PostSortOrder.fromOptVal(parseOptInt32(categoryJson, "comtOrder"))
+    val anyComtNesting = None // later:  parseOptInt32(categoryJson, "comtNesting")
 
     val shallBeDefaultCategory = (categoryJson \ "isDefaultCategory").asOpt[Boolean] is true
     val categoryId = (categoryJson \ "id").as[Int]

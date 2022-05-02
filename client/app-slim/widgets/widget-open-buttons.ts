@@ -50,15 +50,19 @@ export const DiscLayoutDropdownBtn = React.createFactory<DiscLayoutDropdownBtnPr
   // So, the "parent" layout is +1:
   const layoutForParent = props.layoutFor + 1;
 
-  const layout        = page_deriveDiscProps(props.page, props.store, props.layoutFor);
-  const defaultLayout = page_deriveDiscProps(props.page, props.store, layoutForParent);
+  const layout = props.page
+          ? page_deriveLayout(props.page, props.store, props.layoutFor)
+          : cat_deriveLayout(props.cat, props.store, props.layoutFor);
+  const defaultLayout = props.page
+          ? page_deriveLayout(props.page, props.store, layoutForParent)
+          : cat_deriveLayout(props.cat, props.store, layoutForParent);
 
   return (
       Button({ className: 'esTopicType_dropdown', onClick: (event) => {
           const atRect = cloneEventTargetRect(event);
           morebundle.openDiscLayoutDiag({
               atRect, layout, default: defaultLayout,
-              forEveryone: props.forEveryone, onSelect: props.onSelect });
+              forCat: props.forCat, forEveryone: props.forEveryone, onSelect: props.onSelect });
         }},
         comtOrder_title(layout.comtOrder), ' ', r.span({ className: 'caret' })));
 });

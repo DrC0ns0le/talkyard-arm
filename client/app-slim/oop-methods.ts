@@ -1572,21 +1572,34 @@ let numTagTypeMissingWarnings = 0;
 /// And if unspecified everywhere, uses the global site settings.
 ///
 /// RENAME to page_deriveLayout ?
-export function page_deriveDiscProps(page: Page, store: Store, layoutFor: LayoutFor)
+export function page_deriveLayout(page: Page, store: Store, layoutFor: LayoutFor)
+      : DiscPropsDerived {   // RENAME to DiscLayoutDerived?
+  return deriveLayoutImpl(page, null, store, layoutFor);
+}
+
+
+export function cat_deriveLayout(cat: Cat, store: Store, layoutFor: LayoutFor)
+      : DiscPropsDerived {
+  return deriveLayoutImpl(null, cat, store, layoutFor);
+}
+
+
+function deriveLayoutImpl(page: Page, cat: Cat, store: Store, layoutFor: LayoutFor)
       : DiscPropsDerived {   // RENAME to DiscLayoutDerived?
   const anyTweaks = layoutFor === LayoutFor.PageWithTweaks
-                    && page.pageId === store.currentPageId ?
+                    && page && page.pageId === store.currentPageId ?
           store.curPageTweaks : undefined;
 
   let discProps: DiscPropsSource = layoutFor === LayoutFor.Ancestors ?
-        {} : discProps_pluckFrom(page);
+        {} : discProps_pluckFrom(page || cat);
 
   // Start with the parent cat, since it's the most specific cat. Then the
   // grandparent, and so on. Finally, the whole site settings.
   //
   // These: page.ancestorsRootFirst  don't include the comtOrder etc fields.
   // Maybe they should? For now, call this fn instead:
-  const ancCats: Cat[] = store_ancestorCatsCurFirst(store, page.categoryId);
+  const ancCatId = page ? page.categoryId : cat.parentId;
+  const ancCats: Cat[] = store_ancestorCatsCurFirst(store, ancCatId);
 
   for (const cat of ancCats)
     discProps_mergeWith_inPl(discProps, cat);

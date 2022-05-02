@@ -129,7 +129,11 @@ class PageTitleSettingsController @Inject()(cc: ControllerComponents, edContext:
 
     throwForbiddenIf(
           !request.theUser.isStaff && anyComtOrder.isSomethingButNot(oldMeta.comtOrder),
-          "TyECHCMTORD", "You may not change the comment sort order")
+          "TyEXCMTORD", "You may not change the comment sort order")
+
+    throwForbiddenIf(
+          !request.theUser.isStaff && anyComtNesting.isSomethingButNot(oldMeta.comtNesting),
+          "TyEXCMTNST", "You may not change the comment nesting max depth")
 
     if (!request.theUser.isStaff && request.theUserId != oldMeta.authorId)
       throwForbidden("TyECHOTRPGS", "You may not change other people's pages")
@@ -228,8 +232,8 @@ class PageTitleSettingsController @Inject()(cc: ControllerComponents, edContext:
           forumSearchBox = anyForumSearchBox.orElse(oldMeta.forumSearchBox),
           forumMainView = anyForumMainView.orElse(oldMeta.forumMainView),
           forumCatsTopics = anyForumCatsTopics.orElse(oldMeta.forumCatsTopics),
-      //    comtOrder = PostSortOrder.clearOrFirstOf(anyComtOrder, oldMeta.comtOrder),
           comtOrder = anyComtOrder getOrElse oldMeta.comtOrder,
+          comtNesting = anyComtNesting getOrElse oldMeta.comtNesting,
           // A meta post about changing the doingStatus.
           numPostsTotal = oldMeta.numPostsTotal + (addsNewDoingStatusMetaPost ? 1 | 0),
           version = oldMeta.version + 1)

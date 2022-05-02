@@ -263,7 +263,7 @@ case class PageMeta( // ?RENAME to Page? And rename Page to PageAndPosts?  [exp]
   htmlHeadTitle: String = "",
   htmlHeadDescription: String = "",
   numChildPages: Int = 0,   // <-- CLEAN_UP remove, replace with category table
-  )
+  ) // wait:  (mab: MessAborter = IfBadDie)
   extends DiscPropsSource {
 
 
@@ -300,6 +300,10 @@ case class PageMeta( // ?RENAME to Page? And rename Page to PageAndPosts?  [exp]
   require(pageType != PageType.AboutCategory || categoryId.isDefined, s"[DwE5PKI8] $wp")
   require(!pinOrder.exists(!PageMeta.isOkPinOrder(_)), s"[DwE4kEYF2] $wp")
   require(pinOrder.isEmpty == pinWhere.isEmpty, s"[DwE36FK2] $wp")
+
+  require(comtNesting.forall(n => n == -1 || 1 <= n  && n <= 10), // "TyECOMTNST023",
+        s"Bad comment nesting, should be -1 or between 1 and 10: $comtNesting [TyECOMTNST023]")
+
   require(numLikes >= 0, s"[DwE6PKF3] $wp")
   require(numWrongs >= 0, s"[DwE9KEFW2] $wp")
   require(numBurys >= 0, s"[DwE2KEP4] $wp")

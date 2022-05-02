@@ -54,24 +54,30 @@ const DiscLayoutDiag = React.createFactory<{}>(function() {
     setDiagState(null);
   }
 
+  let forCat: Bo | U;
   let forEveryone: Bo | U;
+  let defaultItem: RElm | U;
   let bestFirstItem: RElm | U;
   let oldestFirstItem: RElm | U;
   let newestFirstItem: RElm | U;
   let newestThenBestItem: RElm | U;
 
   if (isOpen) {
+    forCat = diagState.forCat;
     forEveryone = diagState.forEveryone;
-    const makeItem = (comtOrder: PostSortOrder, e2eClass: St): RElm =>
+    const makeItem = (comtOrder: PostSortOrder, e2eClass: St, isDefault?: true): RElm =>
         ExplainingListItem({
-            active: layout.comtOrder === comtOrder,
-            title: r.span({ className: e2eClass  }, widgets.comtOrder_title(comtOrder)),
-            text: comtOrder_descr(comtOrder),
+            active: layout.comtOrder === comtOrder || !layout.comtOrder && isDefault,
+            title: r.span({ className: e2eClass  },
+              (isDefault ? "Default: " : ''),
+              widgets.comtOrder_title(comtOrder)),
+            text: comtOrder_descr(comtOrder, forCat),
             onSelect: () => {
               diagState.onSelect({ ...layout, comtOrder });
               close();
             } });
 
+    defaultItem = makeItem(diagState.default.comtOrder, '', true);
     bestFirstItem = makeItem(PostSortOrder.BestFirst, '');
     oldestFirstItem = makeItem(PostSortOrder.OldestFirst, '');
     newestFirstItem = makeItem(PostSortOrder.NewestFirst, '');
@@ -82,8 +88,18 @@ const DiscLayoutDiag = React.createFactory<{}>(function() {
       DropdownModal({ show: isOpen, onHide: close, atX: atRect.left, atY: atRect.top,
             pullLeft: true, showCloseButton: true },
         r.div({ className: 's_ExplDrp_Ttl' },
-          forEveryone ? `Change comments sort order for everyone:`  // I18N
-                      : `Sort by:`),
+          forCat
+              ? // Should be obvious that this is for everyone, since everything else
+                // in the category edit dialog affects everyone.
+                `Comments sort order, in this category:` // 0I18N, is for staff
+              : (
+                // But when changing sort order, on a specific page, then,
+                // one button is for everyone — the Change... page button.
+                // And another is for oneself only. Therefore, good with
+                // different dialog titles:
+                forEveryone ? `Change comments sort order for everyone:`
+                              : `Sort by:`)),
+        defaultItem,
         bestFirstItem,
         oldestFirstItem,
         newestFirstItem,
@@ -91,8 +107,11 @@ const DiscLayoutDiag = React.createFactory<{}>(function() {
 });
 
 
-export function comtOrder_descr(comtOrder: PostSortOrder): St | N {
+function comtOrder_descr(comtOrder: PostSortOrder, forCat: Bo): St | N {
+  // 0I18N here; this is for staff.
   switch (comtOrder) {
+    case PostSortOrder.Default:
+      return forCat ? "The default, in this category" : null;
     case PostSortOrder.NewestThenBestFirst:
       return "Replies to the Original Post are sorted by newest-first, " +
           "and replies to the replies by popular-first. This can be nice " +

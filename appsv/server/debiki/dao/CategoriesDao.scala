@@ -140,6 +140,8 @@ case class CategoryToSave(
     },
     newTopicTypes = newTopicTypes,
     defaultSortOrder = defaultSortOrder,
+    comtOrder = comtOrder,
+    comtNesting = comtNesting,
     doVoteStyle = doVoteStyle,
     doVoteInTopicList = doVoteInTopicList,
     unlistCategory = unlistCategory,
@@ -660,7 +662,7 @@ trait CategoriesDao {
             newTopicTypes = editsToDo.newTopicTypes,
             defaultSortOrder = editsToDo.defaultSortOrder,
             comtOrder = editsToDo.comtOrder orElse catBef.comtOrder,
-            comtNesting = None, // later
+            comtNesting = editsToDo.comtNesting orElse catBef.comtNesting,
             doVoteStyle = editsToDo.doVoteStyle,
             doVoteInTopicList = editsToDo.doVoteInTopicList,
             unlistCategory = editsToDo.unlistCategory,

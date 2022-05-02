@@ -255,7 +255,7 @@ ReactDispatcher.register(function(payload) {
       currentPage.categoryId = parent ? parent.categoryId : null;
       const was2dTree = currentPage.horizontalLayout;
 
-      const layoutBefore = page_deriveDiscProps(
+      const layoutBefore = page_deriveLayout(
               currentPage, store, LayoutFor.PageNoTweaks);
 
       currentPage.pageRole = newMeta.pageType;
@@ -275,7 +275,7 @@ ReactDispatcher.register(function(payload) {
         });
       }
 
-      const layoutAfter = page_deriveDiscProps(
+      const layoutAfter = page_deriveLayout(
               currentPage, store, LayoutFor.PageNoTweaks);
 
       if (layoutAfter.comtOrder !== layoutBefore.comtOrder) {  // or [max_nesting]
@@ -947,7 +947,7 @@ function updatePost(post: Post, pageId: PageId, isCollapsing?: boolean) {
   // Add or update the post itself.
   page.postsByNr[post.nr] = post;
 
-  const layout = page_deriveDiscProps(page, store, LayoutFor.PageWithTweaks);
+  const layout = page_deriveLayout(page, store, LayoutFor.PageWithTweaks);
 
   // In case this is a new post, update its parent's child id list.
   const parentPost = page.postsByNr[post.parentNr];

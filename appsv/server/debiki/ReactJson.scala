@@ -1839,6 +1839,8 @@ object JsonMaker {
           category.newTopicTypes.headOption.getOrElse(PageType.Discussion).toInt),
       // [refactor] [5YKW294] delete this later:
       "newTopicTypes" -> JsArray(category.newTopicTypes.map(t => JsNumber(t.toInt))),
+      "comtOrder" -> JsNum32OrNull(category.comtOrder.map(_.toInt)),
+      "comtNesting" -> JsNum32OrNull(category.comtNesting),
       // For now, this cannot be configured in any more detail. [do_it_on_off]
       "doItVotesPopFirst" -> JsBoolOrNull(category.doVoteStyle.map(_ => true)),
       "unlistCategory" -> JsBoolean(category.unlistCategory),

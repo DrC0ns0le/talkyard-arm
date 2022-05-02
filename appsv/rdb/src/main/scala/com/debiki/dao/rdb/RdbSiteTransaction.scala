@@ -599,7 +599,7 @@ class RdbSiteTransaction(var siteId: SiteId, val daoFactory: RdbDaoFactory, val 
       newMeta.frequentPosterIds.drop(3).headOption.orNullInt,
       newMeta.layout.toInt.asAnyRef,
       newMeta.comtOrder.map(_.toInt).orNullInt,
-      newMeta.comtNesting.map(_.toInt).orNullInt,
+      NullInt,  // later: newMeta.comtNesting.orNullInt,
       newMeta.forumSearchBox.orNullInt,
       newMeta.forumMainView.orNullInt,
       newMeta.forumCatsTopics.orNullInt,

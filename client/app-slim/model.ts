@@ -2201,9 +2201,11 @@ interface TagDiagProps {
 
 
 interface DiscLayoutDropdownBtnProps {
-  page: Page;
+  page?: Page;  // either...
+  cat?: Cat;    // ...or.
   store: Store;
   layoutFor: LayoutFor;
+  forCat?: Bo;
   forEveryone?: Bo;
   onSelect: (newLayout: DiscPropsSource) => Vo;
 }
@@ -2213,6 +2215,7 @@ interface DiscLayoutDiagState {
   atRect: Rect;
   layout: DiscPropsSource;
   default: DiscPropsSource;
+  forCat?: Bo;
   forEveryone?: Bo;
   onSelect: (newLayout: DiscPropsSource) => Vo ;
 }
