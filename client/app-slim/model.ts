@@ -758,7 +758,7 @@ interface StaffTours {
 
 type Category = Cat; // Too long name!
 
-interface Cat extends DiscLayout {
+interface Cat extends DiscPropsSource {
   id: CategoryId;
   parentId?: CategoryId;  // RENAME to parCatId? simpler to grep and [concice_is_nice].
   sectionPageId?: any; // only when saving to server?   // RENAME to ixPgId? (index page id)
@@ -964,7 +964,7 @@ interface Page
     // So we can see from where a setting comes — is it from some ancestor category
     // or group? Or the whole forum? Otherwise, hard to troubleshoot unexpected
     // effective settings.
-    extends TopicInterfaceSettings, DiscLayout {
+    extends TopicInterfaceSettings, DiscPropsSource {
   dbgSrc: string;
   pageId: PageId;
   pageVersion: PageVersion;
@@ -1042,7 +1042,7 @@ interface PageMetaBrief {
 }
 
 
-interface PageMeta {
+interface PageMeta extends DiscPropsSource {
   id: PageId;
   pageType: PageRole;
   version: number;
@@ -1057,8 +1057,8 @@ interface PageMeta {
   authorId: UserId;
   frequentPosterIds: number[];
   layout: PageLayout;
-  comtOrder?: PostSortOrder;   // right?
-  comtNesting?: NestingDepth;   // right?
+  //comtOrder?: PostSortOrder; — in DiscPropsSource
+  //comtNesting?: NestingDepth;
   pinOrder?: number;
   pinWhere?: PinPageWhere;
   numLikes: number;
@@ -1263,9 +1263,20 @@ interface SettingsVisibleClientSide extends TopicInterfaceSettings {
 //
 // Currently configured for all categories, and(optionally) per category and page.
 // Maybe later: disc_layout_t.
-interface DiscLayout {
-  comtOrder?: PostSortOrder; //ComtOrder;
-  comtNesting?: Nr;
+// RENAME to DiscLayoutSource?
+interface DiscPropsSource {
+  comtOrder?: PostSortOrder;
+  comtNesting?: NestingDepth;
+}
+
+// RENAME to DiscLayoutDerived?
+interface DiscPropsDerived {
+  comtOrder: PostSortOrder;
+  comtNesting: NestingDepth;  // not yet in use [max_nesting]
+}
+
+// And extends TopicListLayout, KnowledgeBaseLayout etc, all layouts.
+interface Layout extends DiscPropsDerived {
 }
 
 
@@ -2191,17 +2202,19 @@ interface TagDiagProps {
 
 interface DiscLayoutDropdownBtnProps {
   page: Page;
-  usePageTweaks?: UseTweaks;
   store: Store;
-  onSelect: (newLayout: DiscLayout) => Vo;
+  layoutFor: LayoutFor;
+  forEveryone?: Bo;
+  onSelect: (newLayout: DiscPropsSource) => Vo;
 }
 
 
 interface DiscLayoutDiagState {
   atRect: Rect;
-  layout: DiscLayout;
-  default: DiscLayout;
-  onSelect: (newLayout: DiscLayout) => Vo ;
+  layout: DiscPropsSource;
+  default: DiscPropsSource;
+  forEveryone?: Bo;
+  onSelect: (newLayout: DiscPropsSource) => Vo ;
 }
 
 
@@ -2460,8 +2473,10 @@ interface ResponseObj {
   responseText: string;
 }
 
-
-interface EditPageRequestData extends DiscLayout {
+// RENAME to AlterPageReqData?  "Edit" sounds wrong, since the Orig Post isn't edited.
+// "Alter" means: "to make different without changing into something else"
+// (so "alter" is also better thant "change", here).
+interface EditPageRequestData extends DiscPropsSource {
     //pageId: PageId; — filled in By Server.ts
     newTitle?: string;
     categoryId?: CategoryId;

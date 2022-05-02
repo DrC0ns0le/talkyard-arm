@@ -255,7 +255,8 @@ ReactDispatcher.register(function(payload) {
       currentPage.categoryId = parent ? parent.categoryId : null;
       const was2dTree = currentPage.horizontalLayout;
 
-      const pageEffPropsBefore = page_effProps(currentPage, store, UseTweaks.Yes);
+      const layoutBefore = page_deriveDiscProps(
+              currentPage, store, LayoutFor.PageNoTweaks);
 
       currentPage.pageRole = newMeta.pageType;
       currentPage.doingStatus = newMeta.doingStatus;
@@ -264,19 +265,25 @@ ReactDispatcher.register(function(payload) {
       currentPage.pageDoneAtMs = newMeta.doneAt;
       currentPage.pageClosedAtMs = newMeta.closedAt;
 
-      //const newOrder = firstDefinedOf(store.curPageTweaks?.comtOrder, newMeta.comtOrder);
-      //const changesComtSortOrder = isDefButNot(newOrder, currentPage.comtOrder);
-
-      const pageEffPropsAfter = page_effProps(currentPage, store, UseTweaks.Yes);
-
       currentPage.comtOrder = newMeta.comtOrder;
       currentPage.comtNesting = newMeta.comtNesting;
-      if (pageEffPropsAfter.comtOrder !== pageEffPropsBefore.comtOrder) {  // or max nesting
-        store_relayoutPageInPlace(store, currentPage, pageEffPropsAfter);
+
+      // Clear any page tweaks — otherwise it'll look as if the changes had no effect.
+      if (store.curPageTweaks) {
+        _.each(action.changes, (value, key: St) => {
+          delete store.curPageTweaks[key];
+        });
+      }
+
+      const layoutAfter = page_deriveDiscProps(
+              currentPage, store, LayoutFor.PageNoTweaks);
+
+      if (layoutAfter.comtOrder !== layoutBefore.comtOrder) {  // or [max_nesting]
+        store_relayoutPageInPlace(store, currentPage, layoutAfter);
       }
 
       // [2D_LAYOUT]
-      //currentPage.horizontalLayout = action.newPageRole === PageRole.MindMap || currentPage.is2dTreeDefault;
+      //currentPage.horizontalLayout = action.newPageMeta.page type === PageRole.MindMap || currentPage.is2dTreeDefault;
       //const is2dTree = currentPage.horizontalLayout;
 
       updatePost(action.newTitlePost, currentPage.pageId);
@@ -940,7 +947,7 @@ function updatePost(post: Post, pageId: PageId, isCollapsing?: boolean) {
   // Add or update the post itself.
   page.postsByNr[post.nr] = post;
 
-  const pageEffProps = page_effProps(page, store, UseTweaks.Yes);
+  const layout = page_deriveDiscProps(page, store, LayoutFor.PageWithTweaks);
 
   // In case this is a new post, update its parent's child id list.
   const parentPost = page.postsByNr[post.parentNr];
@@ -956,7 +963,7 @@ function updatePost(post: Post, pageId: PageId, isCollapsing?: boolean) {
       }
       sortPostNrsInPlace(
             childNrsSorted, page.postsByNr,
-            pageEffProps.comtOrder);
+            layout.comtOrder);
          // page.discPostSortOrder
     }
   }
@@ -978,7 +985,7 @@ function updatePost(post: Post, pageId: PageId, isCollapsing?: boolean) {
   if (!post.parentNr && post.nr != BodyNr && post.nr !== TitleNr) {
     page.parentlessReplyNrsSorted = findParentlessReplyIds(page.postsByNr);
     sortPostNrsInPlace(
-        page.parentlessReplyNrsSorted, page.postsByNr, pageEffProps.comtOrder);
+        page.parentlessReplyNrsSorted, page.postsByNr, layout.comtOrder);
                                                     // page.discPostSortOrder);
   }
 
@@ -1258,11 +1265,14 @@ function findParentlessReplyIds(postsByNr): number[] {
 
 
 
-function store_relayoutPageInPlace(store, page, layout: DiscLayout) {
-  // ?
+function store_relayoutPageInPlace(store, page, layout: DiscPropsSource) {
   _.each(page.postsByNr, (post: Post) => {
+    const sortOrder =
+        layout.comtOrder !== PostSortOrder.NewestThenBestFirst
+            ?  layout.comtOrder
+            : (post.nr === BodyNr ? PostSortOrder.NewestFirst : PostSortOrder.BestFirst);
     sortPostNrsInPlace(
-          post.childNrsSorted, page.postsByNr, layout.comtOrder);
+          post.childNrsSorted, page.postsByNr, sortOrder);
   });
 }
 
@@ -1271,7 +1281,7 @@ function store_relayoutPageInPlace(store, page, layout: DiscLayout) {
  * NOTE: Keep in sync with  sortPosts(posts, sortOrder)   [SAMESORT]
  * in modules/debiki-core/src/main/scala/com/debiki/core/Post.scala
  */
-function sortPostNrsInPlace(postNrs: PostNr[], postsByNr: { [nr: number]: Post },  // sss
+function sortPostNrsInPlace(postNrs: PostNr[], postsByNr: { [nr: number]: Post },
       postSortOrder: PostSortOrder | U) {
   switch (postSortOrder || PostSortOrder.Default) {
     case PostSortOrder.BestFirst:

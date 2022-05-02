@@ -26,24 +26,6 @@ const DropdownModal = utils.DropdownModal;
 const ExplainingListItem = util.ExplainingListItem;
 
 
-
-/*
-export const DiscLayoutDropdownBtn = React.createFactory<DiscLayoutDropdownBtnProps>(
-        function(props: DiscLayoutDropdownBtnProps) {
-  /*
-      Button({ onClick: this.open, ref: 'dropdownButton', className: 'esTopicType_dropdown' },
-        pageRole_toIconString(pageRole), ' ', r.span({ className: 'caret' }));
-        *  /
-  return (
-      Button({ onClick: (event) => {
-        const atRect = cloneEventTargetRect(event);
-        pagedialogs.openDiscLayoutDiag({
-              atRect, layout: props.page, onSelect: props.onSelect });
-      }}, `Sort: ${props.page.comtOrder}, nesting: ${props.page.comtNesting}`));
-});  */
-
-
-
 let dialogSetState: (_: DiscLayoutDiagState) => Vo;
 
 export function openDiscLayoutDiag(ps: DiscLayoutDiagState) {
@@ -64,7 +46,7 @@ const DiscLayoutDiag = React.createFactory<{}>(function() {
 
   dialogSetState = setDiagState;
 
-  const layout: DiscLayout | U = diagState && diagState.layout;
+  const layout: DiscPropsSource | U = diagState && diagState.layout;
   const atRect: Rect = (diagState?.atRect || {}) as Rect;
   const isOpen = !!layout;
 
@@ -72,18 +54,19 @@ const DiscLayoutDiag = React.createFactory<{}>(function() {
     setDiagState(null);
   }
 
+  let forEveryone: Bo | U;
   let bestFirstItem: RElm | U;
   let oldestFirstItem: RElm | U;
   let newestFirstItem: RElm | U;
   let newestThenBestItem: RElm | U;
 
   if (isOpen) {
+    forEveryone = diagState.forEveryone;
     const makeItem = (comtOrder: PostSortOrder, e2eClass: St): RElm =>
         ExplainingListItem({
             active: layout.comtOrder === comtOrder,
-            title: r.span({ className: e2eClass  }, comtOrder), // comtOrder_title(comtOrder)),
-                                                   // emailPref_title(emailPref)),
-            text: "descr", // emailPref_descr(emailPref),
+            title: r.span({ className: e2eClass  }, widgets.comtOrder_title(comtOrder)),
+            text: comtOrder_descr(comtOrder),
             onSelect: () => {
               diagState.onSelect({ ...layout, comtOrder });
               close();
@@ -98,12 +81,26 @@ const DiscLayoutDiag = React.createFactory<{}>(function() {
   return (
       DropdownModal({ show: isOpen, onHide: close, atX: atRect.left, atY: atRect.top,
             pullLeft: true, showCloseButton: true },
-        r.div({ className: 's_ExplDrp_Ttl' }, "Sort comments" + ':'),  // I18N
+        r.div({ className: 's_ExplDrp_Ttl' },
+          forEveryone ? `Change comments sort order for everyone:`  // I18N
+                      : `Sort by:`),
         bestFirstItem,
         oldestFirstItem,
         newestFirstItem,
         newestThenBestItem));
 });
+
+
+export function comtOrder_descr(comtOrder: PostSortOrder): St | N {
+  switch (comtOrder) {
+    case PostSortOrder.NewestThenBestFirst:
+      return "Replies to the Original Post are sorted by newest-first, " +
+          "and replies to the replies by popular-first. This can be nice " +
+          "if you post status updates as comments — the most recent update, " +
+          "appears at the top, with replies sorted popular-first.";
+    default: return null;
+  }
+}
 
 
 //------------------------------------------------------------------------------

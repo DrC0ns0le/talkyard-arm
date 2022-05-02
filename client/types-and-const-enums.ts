@@ -450,15 +450,18 @@ const InfiniteNesting: NestingDepth = -1;  // sync with Scala
 /// or OldestFirst if unspecified everywhere.
 ///
 const enum PostSortOrder {  // rename to ComtSortOrder? Since not for orig post and title post.
-  Default = 0,
-  BestFirst = 1,
+  Default = 0,   // Inherit from parent category
+  BestFirst = 1, // Q&A sites, Reddit, StackOverflow
   NewestFirst = 2,
-  OldestFirst = 3,
-  NewestThenBestFirst = NewestFirst + (BestFirst << 4),
-  //Random = _
-  //ControversialFirst = _,
+  OldestFirst = 3,  // all traditional forum software does this
+  //BestForMeFirst = _,   // what the current visitor likely wants to see
   //TrendingFirst = _,
+  //ControversialFirst = _,
   //ProblematicFirst = _,
+  //Random = _
+  //BestThenOldest = BestFirst + (OldestFirst << 4),  // StackOverflow, if max nesting = 2
+  NewestThenBestFirst = NewestFirst + (BestFirst << 4),
+  //NewestThenOldestFirst = NewestFirst + (OldestFirst << 4), // Facebook style, if max nesting 2
 }
 
 const enum ProgressLayout {
@@ -585,10 +588,12 @@ const enum HostRole {
 }
 
 
-const enum UseTweaks {
-  No = 0,  // 0 instead of false
-  Yes = 1, // 1 instead of true
+const enum LayoutFor {
+  PageWithTweaks = 1,
+  PageNoTweaks   = PageWithTweaks + 1,
+  Ancestors      = PageNoTweaks + 1,
 }
+
 
 const enum Sizes {
   Kilobyte = 1000,   // kB

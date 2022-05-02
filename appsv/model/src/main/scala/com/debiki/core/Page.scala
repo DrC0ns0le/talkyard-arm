@@ -477,6 +477,7 @@ case class PageMeta( // ?RENAME to Page? And rename Page to PageAndPosts?  [exp]
 }
 
 
+// Sync w Typescript, & break out to own file?   [disc_props_js_scala]
 
 case class SectPropsDerived(
   doVoteStyle: DoVoteStyle,
@@ -551,6 +552,7 @@ private case class DiscPropsMerged(
   extends DiscPropsSource {
 
   def mergeWith(source: DiscPropsSource): DiscPropsMerged =
+    // Same as: discProps_mergeWith() in Typescript.  [disc_props_js_scala]
     DiscPropsMerged(
           comtOrder = this.comtOrder.orElse(source.comtOrder),
           comtNesting = this.comtNesting.orElse(source.comtNesting))

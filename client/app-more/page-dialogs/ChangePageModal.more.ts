@@ -188,8 +188,8 @@ const ChangePageDialog = createComponent({
             widgets.DiscLayoutDropdownBtn({ page, store,
                 // Don't show [temp sort order changes ("tweaks") done in this browser]
                 // — instead, now, we're saving server side, for everyone.
-                usePageTweaks: UseTweaks.No,
-                onSelect: (newLayout: DiscLayout) => {
+                layoutFor: LayoutFor.PageNoTweaks, forEveryone: true,
+                onSelect: (newLayout: DiscPropsSource) => {
                   savePage(newLayout);
                 }})));
 

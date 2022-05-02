@@ -516,7 +516,8 @@ declare namespace debiki2 {
 
   namespace widgets {
     function DiscLayoutDropdownBtn(props: DiscLayoutDropdownBtnProps);
-    // const DiscLayoutDropdownBtn = React.createFactory<DiscLayoutDropdownBtnProps>(
+    function comtOrder_title(comtOrder: PostSortOrder): St;
+    //function comtOrder_descr — is in the more-bundle
   }
 
   var SelectCategoryDropdown: any;

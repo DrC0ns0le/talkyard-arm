@@ -1058,8 +1058,11 @@ package object core {
 
   // ----- PostsSortOrder
 
+  sealed trait ComtOrderAtDepth
+
   sealed abstract class PostSortOrder(val IntVal: Int, val isByTime: Bo) {
     def toInt: Int = IntVal
+    def atDepth(_depth: i32): ComtOrderAtDepth = this.asInstanceOf[ComtOrderAtDepth]
   }
 
   object PostSortOrder {
@@ -1074,11 +1077,17 @@ package object core {
     //       ProblematicFirst  — for mods, to see flagged and unwanted things first
 
     case object Default extends PostSortOrder(0, false) // change to OldestFirst?
-    case object BestFirst extends PostSortOrder(BestFirstNibble, false)
-    case object NewestFirst extends PostSortOrder(NewestFirstNibble, true)
-    case object OldestFirst extends PostSortOrder(OldestFirstNibble, true)
+    case object BestFirst extends PostSortOrder(BestFirstNibble, false) with ComtOrderAtDepth
+    case object NewestFirst extends PostSortOrder(NewestFirstNibble, true) with ComtOrderAtDepth
+    case object OldestFirst extends PostSortOrder(OldestFirstNibble, true) with ComtOrderAtDepth
+
     case object NewestThenBestFirst extends PostSortOrder(
-      NewestFirstNibble + (BestFirstNibble << 4), true)
+      NewestFirstNibble + (BestFirstNibble << 4), true) {
+
+      override def atDepth(depth: i32): ComtOrderAtDepth =
+        if (depth <= 1) NewestFirst
+        else BestFirst
+    }
 
     val DefaultForEmbComs: PostSortOrder = BestFirst
 
@@ -1107,6 +1116,7 @@ package object core {
       case BestFirst.IntVal => BestFirst
       case NewestFirst.IntVal => NewestFirst
       case OldestFirst.IntVal => OldestFirst
+      case NewestThenBestFirst.IntVal => NewestThenBestFirst
       case _ => return None
     })
 

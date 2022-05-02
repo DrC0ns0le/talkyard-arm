@@ -871,8 +871,7 @@ object Post {
     * NOTE: Keep in sync with  sortPostNrsInPlace()   [SAMESORT]
     * in client/app/ReactStore.ts.
     */
-  def sortPosts(posts: immutable.Seq[Post], sortOrder: PostSortOrder)
-        : immutable.Seq[Post] = {
+  def sortPosts(posts: Vec[Post], sortOrder: ComtOrderAtDepth): Vec[Post] = {
 
     // The default is oldest first, see decisions.adoc  [why_sort_by_time].
     var sortFn: (Post, Post) => Bo = sortPostsOldestFirst

@@ -31,23 +31,36 @@ const r = ReactDOMFactories;
 
 export const DiscLayoutDropdownBtn = React.createFactory<DiscLayoutDropdownBtnProps>(
         function(props: DiscLayoutDropdownBtnProps) {
-
-  /* Button({ onClick: this.open, ref: 'dropdownButton', className: 'esTopicType_dropdown' },
-        pageRole_toIconString(pageRole), ' ', r.span({ className: 'caret' })); */
-
-  const pageLayoutProps = {
+    /*
+  const layout = {
     comtOrder: props.page.comtOrder,
     comtNesting: props.page.comtNesting,
   };
 
-  const effLayout = page_effProps(props.page, props.store, props.usePageTweaks);
+  const defaultLayout = page_deriveDiscProps(props.page, props.store, props.layoutFor);
+  */
+
+  // If we're A) altering the page layout, e.g. the comments sort order,
+  // but not saving server side, then,
+  // layoutFor === PageWithTweaks, and the default layout would be the page *without*
+  // tweaks, that is,  PageNoTweaks = PageWithTweaks + 1.
+  // And if we're B) saving server side, then,
+  // layoutFor === PageNoTweaks, and the defaults would be the category layout props
+  // (if the page didn't have its own), that is,  LayoutFor.Ancestors = PageNoTweaks + 1.
+  // So, the "parent" layout is +1:
+  const layoutForParent = props.layoutFor + 1;
+
+  const layout        = page_deriveDiscProps(props.page, props.store, props.layoutFor);
+  const defaultLayout = page_deriveDiscProps(props.page, props.store, layoutForParent);
 
   return (
       Button({ className: 'esTopicType_dropdown', onClick: (event) => {
-        const atRect = cloneEventTargetRect(event);
-        morebundle.openDiscLayoutDiag({
-              atRect, layout: pageLayoutProps, default: effLayout, onSelect: props.onSelect });
-      }}, comtOrder_title(effLayout.comtOrder), ' ', r.span({ className: 'caret' })));
+          const atRect = cloneEventTargetRect(event);
+          morebundle.openDiscLayoutDiag({
+              atRect, layout, default: defaultLayout,
+              forEveryone: props.forEveryone, onSelect: props.onSelect });
+        }},
+        comtOrder_title(layout.comtOrder), ' ', r.span({ className: 'caret' })));
 });
 
 
@@ -55,8 +68,8 @@ export function comtOrder_title(comtOrder: PostSortOrder): St {
   switch (comtOrder) {
     case PostSortOrder.OldestFirst: return "Oldest first";  // I18N here and below
     case PostSortOrder.NewestFirst: return "Newest first";
-    case PostSortOrder.BestFirst: return "Best first";
-    case PostSortOrder.NewestThenBestFirst: return "Newest then Best first";
+    case PostSortOrder.BestFirst: return "Popular first";
+    case PostSortOrder.NewestThenBestFirst: return "Newest then Popular";
   }
   return `Bad: ${comtOrder} TyECMTORDR`;
 }

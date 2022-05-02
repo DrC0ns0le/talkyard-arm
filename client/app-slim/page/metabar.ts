@@ -98,8 +98,10 @@ export var Metabar = createComponent({
       const effPref = pageNotfPrefTarget_findEffPref({ pageId: page.pageId }, store, me);
       const level = notfPref_level(effPref);
       notfLevelElem = r.span({ className: `dw-page-notf-level n_NfLv-${level}`,
-              onClick: this.onToggleDetailsClick },
-          t.Notifications + ': ' + notfPref_title(effPref));
+              }, // onClick: this.onToggleDetailsClick },
+          t.Notifications + ': ', // + notfPref_title(effPref));
+          notfs.PageNotfPrefButton({ target: { pageId: store.currentPageId },
+                  store, ownPrefs: me }));
     }
 
     const toggleDetailsBtn = !me.isLoggedIn ? null :
@@ -117,15 +119,16 @@ export var Metabar = createComponent({
                 page.numRepliesVisible + ' ' + (
                     isBlogComments ? (t.comments || t.replies) : t.replies)),  // I18N t.comments missing
               r.li({},
-                widgets.DiscLayoutDropdownBtn({ page, store, usePageTweaks: UseTweaks.Yes,
-                    onSelect: (newLayout: DiscLayout) => {
+                widgets.DiscLayoutDropdownBtn({ page, store,
+                    layoutFor: LayoutFor.PageWithTweaks,
+                    onSelect: (newLayout: DiscPropsSource) => {
                       // This'll change the layout in this browser only (not saved server side).
                       ReactActions.patchTheStore({
-                        curPageTweaks: newLayout, // { tempProps: newLayout },
+                        curPageTweaks: newLayout,
                       });
                     } })),
               nameLoginBtns,
-              r.li({}, notfLevelElem)),
+              r.li({}, notfLevelElem)), //NotfPrefBtn(store, me))),
           toggleDetailsBtn);
 
     const detailsElem = ui.showDetails
@@ -184,12 +187,15 @@ const MetabarDetails = createComponent({
   render: function() {
     const store: Store = this.props.store;
     const me: Myself = store.me;
+    const notificationsElem = NotfPrefBtn(store, me); /*
+
     const userAuthenticated = me && me.isAuthenticated;
 
     const notificationsElem = !userAuthenticated ? null :
       r.div({},
         r.div({ className: 'esMB_Dtls_Ntfs_Lbl' }, t.mb.NotfsAbtThisC),
         notfs.PageNotfPrefButton({ target: { pageId: store.currentPageId }, store, ownPrefs: me }));
+        */
 
     return (
       r.div({ className: 'dw-cmts-tlbr-details' },
@@ -197,6 +203,15 @@ const MetabarDetails = createComponent({
   }
 });
 
+
+function NotfPrefBtn(store: Store, me: Me) {
+  const userAuthenticated = me && me.isAuthenticated;
+  return !userAuthenticated ? null :
+      r.div({},
+        r.div({ className: 'esMB_Dtls_Ntfs_Lbl' }, t.mb.NotfsAbtThisC),
+        notfs.PageNotfPrefButton({ target: { pageId: store.currentPageId }, store, ownPrefs: me }));
+
+}
 
 
 function estimateReadingTimeMinutesSkipOrigPost(posts: Post[]): number {

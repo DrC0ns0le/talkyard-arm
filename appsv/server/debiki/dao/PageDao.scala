@@ -84,7 +84,7 @@ case class NotYetCreatedEmbeddedPage(
   override def path: Option[PagePathWithId] =
     Some(PagePathWithId.fromIdOnly(pageId = EmptyPageId, canonical = true))
 
-  override def parts: PageParts = PreLoadedPageParts(meta, allPosts = Nil)
+  override def parts: PageParts = PreLoadedPageParts(meta, allPosts = Vec.empty)
 
   override def version: PageVersion = 1
 }
@@ -175,7 +175,7 @@ case class PagePartsDao(
     }
   }
 
-  private var _allPosts: immutable.Seq[Post] = _
+  private var _allPosts: Vec[Post] = _
 
   def loadAllPosts(): Unit = {
     if (_allPosts eq null) {
@@ -183,7 +183,7 @@ case class PagePartsDao(
     }
   }
 
-  override def allPosts: immutable.Seq[Post] = {
+  override def allPosts: Vec[Post] = {
     if (_allPosts eq null) {
       loadAllPosts()
     }

@@ -717,9 +717,28 @@ export function pat_mayEditTags(me: Me, ps: { forPost?: Post, forPat?: Pat,
 //----------------------------------
 
 
-export function settings_pluckDiscProps(settings: SettingsVisibleClientSide) {
+export function discProps_pluckFrom(what: DiscPropsSource | SettingsVisibleClientSide)
+      : DiscPropsDerived {
+  const source = what as DiscPropsSource;
+  const settings = what as SettingsVisibleClientSide;
+  return {
+    // Sync these defaults w Scala: AllSettings [8L4KWU02]
+    comtOrder: source.comtOrder || settings.discPostSortOrder || PostSortOrder.BestFirst,
+    comtNesting: source.comtNesting || settings.discPostNesting || -1,
+  }
 }
 
+/// Merges other into self; mutates self (_inPl = in-place).
+///
+export function discProps_mergeWith_inPl(self: DiscPropsSource, other: DiscPropsSource) {
+  // Same as: DiscPropsMerged.mergeWith() in Scala.  [disc_props_js_scala]
+  if (!self.comtOrder) {
+    self.comtOrder = other.comtOrder;
+  }
+  if (!self.comtNesting) {
+    self.comtNesting = other.comtNesting;
+  }
+}
 
 export function settings_showCategories(settings: SettingsVisibleClientSide, me: Myself) {
   // Later: by default, do as 'settings' say, but let user preferences override. [8WK4SD7]
@@ -1543,51 +1562,44 @@ let numTagTypeMissingWarnings = 0;
 
 
 
+
 // Page
 //----------------------------------
 
-/// Effective properties. For each unspecified page field, e.g. sort order,
-/// looks at the ancestor categories, to find out what value to use.
+
+/// Discussion properties. For each unspecified page property, e.g. sort order,
+/// look at the ancestor categories, to find out what value to use.
 /// And if unspecified everywhere, uses the global site settings.
 ///
-export function page_effProps(page: Page, store: Store, usePageTweaks: UseTweaks): Page {
-  const anyTweaks = usePageTweaks && page.pageId === store.currentPageId ?
+/// RENAME to page_deriveLayout ?
+export function page_deriveDiscProps(page: Page, store: Store, layoutFor: LayoutFor)
+      : DiscPropsDerived {   // RENAME to DiscLayoutDerived?
+  const anyTweaks = layoutFor === LayoutFor.PageWithTweaks
+                    && page.pageId === store.currentPageId ?
           store.curPageTweaks : undefined;
 
-  let effProps = { ...page }; //, ...anyTweaks };   //, ...page.tempProps };
+  let discProps: DiscPropsSource = layoutFor === LayoutFor.Ancestors ?
+        {} : discProps_pluckFrom(page);
 
   // Start with the parent cat, since it's the most specific cat. Then the
   // grandparent, and so on. Finally, the whole site settings.
-
+  //
   // These: page.ancestorsRootFirst  don't include the comtOrder etc fields.
   // Maybe they should? For now, call this fn instead:
   const ancCats: Cat[] = store_ancestorCatsCurFirst(store, page.categoryId);
 
-  for (const cat of ancCats) {
-    if (!effProps.comtOrder) {
-      effProps.comtOrder = cat.comtOrder;
-    }
-    if (!effProps.comtNesting) {
-      effProps.comtNesting = cat.comtNesting;
-    }
-    // More ...
-  }
+  for (const cat of ancCats)
+    discProps_mergeWith_inPl(discProps, cat);
 
-  /*
-  // Lastly, site wide settings.
-  if (!effProps.comtOrder) {
-    //effProps.comtOrder = store.settings.discPostSortOrder;  // hmm
-  }
-  if (!effProps.comtNesting) {
-    effProps.comtNesting = store.settings.discPostNesting;  // orig post at 0 in both?
-  } */
-  //effProps = { ...effProps, ...settings_pluckDiscProps(store.settings) };
+  const settingsDiscProps: DiscPropsDerived = discProps_pluckFrom(store.settings);
+  let finalProps: DiscPropsDerived = { ...settingsDiscProps, ...discProps };
 
-  if (anyTweaks) {
-    effProps = { ...effProps, ...anyTweaks };
-  }
-  return effProps;
+  if (anyTweaks)
+    finalProps = { ...finalProps, ...anyTweaks };
+
+  return finalProps;
 }
+
 
 export function page_authorId(page: Page): PatId | U {
   const origPost = page.postsByNr[BodyNr];
