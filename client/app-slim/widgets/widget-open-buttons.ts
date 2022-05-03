@@ -32,6 +32,19 @@ const r = ReactDOMFactories;
 export const DiscLayoutDropdownBtn = React.createFactory<DiscLayoutDropdownBtnProps>(
         function(props: DiscLayoutDropdownBtnProps) {
 
+  let layoutSource;
+  if (!props.page) {
+    dieIf(!props.cat, 'TyE604MWJJ34');
+    layoutSource = discProps_pluckFrom(props.cat);
+  }
+  else {
+    layoutSource = discProps_pluckFrom(props.cat);
+    if (props.layoutFor === LayoutFor.PageWithTweaks) {
+      const tempLayoutTweaks = discProps_pluckFrom(props.store.curPageTweaks);
+      layoutSource = { ...layoutSource, ...tempLayoutTweaks };
+    }
+  }
+
   // If we're A) altering the page layout, e.g. the comments sort order,
   // but not saving server side, then,
   // layoutFor === PageWithTweaks, and the default layout would be the page *without*
@@ -42,14 +55,15 @@ export const DiscLayoutDropdownBtn = React.createFactory<DiscLayoutDropdownBtnPr
   // So, the "parent" layout is +1:
   const layoutForParent = props.layoutFor + 1;
 
-  const thisLayoutProps = discProps_pluckFrom(props.page || props.cat);
+  /*
+  const _thisLayoutProps = discProps_pluckFrom(props.page || props.cat);
   // Harmless UX BUG: page tweaks not included. Could merge from props.store.curPageTweaks,
-  // but only if layoutFor === LayoutFor.PageWithTweaks, right.
+  // but only if layoutFor === LayoutFor.PageWithTweaks, right. */
 
-  const thisLayout = props.page
+  const actualLayout: DiscPropsDerived = props.page
           ? page_deriveLayout(props.page, props.store, props.layoutFor)
           : cat_deriveLayout(props.cat, props.store, props.layoutFor);
-  const parentsLayout = props.page
+  const parentsLayout: DiscPropsDerived = props.page
           ? page_deriveLayout(props.page, props.store, layoutForParent)
           : cat_deriveLayout(props.cat, props.store, layoutForParent);
 
@@ -57,11 +71,11 @@ export const DiscLayoutDropdownBtn = React.createFactory<DiscLayoutDropdownBtnPr
       Button({ className: 'esTopicType_dropdown', onClick: (event) => {
           const atRect = cloneEventTargetRect(event);
           morebundle.openDiscLayoutDiag({
-              atRect, layout: thisLayoutProps,
+              atRect, layout: layoutSource,
               default: parentsLayout,
               forCat: props.forCat, forEveryone: props.forEveryone, onSelect: props.onSelect });
         }},
-        comtOrder_title(thisLayout.comtOrder), ' ', r.span({ className: 'caret' })));
+        comtOrder_title(actualLayout.comtOrder), ' ', r.span({ className: 'caret' })));
 });
 
 

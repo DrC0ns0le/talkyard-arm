@@ -1670,8 +1670,6 @@ function patchTheStore(storePatch: StorePatch) {  // REFACTOR just call directly
     delete store.curPageTweaks;
   }
   else if (storePatch.curPageTweaks) {
-    const patchTweaks = storePatch.curPageTweaks;
-    //if (patchTweaks.comtOrder && patchTweaks.comtOrder !== store.curPageTweaks.comtOrder) {
     changesComtSortOrder = isDef(storePatch.curPageTweaks.comtOrder);
     store.curPageTweaks = {
       ...store.curPageTweaks,
@@ -1682,6 +1680,9 @@ function patchTheStore(storePatch: StorePatch) {  // REFACTOR just call directly
       // delete any comtOrder value, so the parent category's or site settings value
       // gets used instead.
       delete store.curPageTweaks.comtOrder;
+    }
+    if (store.curPageTweaks.comtNesting === InfiniteNesting) {
+      delete store.curPageTweaks.comtNesting;
     }
   }
 
@@ -1760,7 +1761,9 @@ function patchTheStore(storePatch: StorePatch) {  // REFACTOR just call directly
   });
 
   if (changesComtSortOrder) {
-    store_relayoutPageInPlace(store, currentPage, storePatch.curPageTweaks);
+    const layoutAfter = page_deriveLayout(
+            currentPage, store, LayoutFor.PageWithTweaks);
+    store_relayoutPageInPlace(store, currentPage, layoutAfter); //storePatch.curPageTweaks);
   }
 
   // Update the current page.
