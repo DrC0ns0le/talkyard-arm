@@ -61,27 +61,43 @@ const DiscLayoutDiag = React.createFactory<{}>(function() {
   let oldestFirstItem: RElm | U;
   let newestFirstItem: RElm | U;
   let newestThenBestItem: RElm | U;
+  let newestThenOldestItem: RElm | U;
 
   if (isOpen) {
     forCat = diagState.forCat;
     forEveryone = diagState.forEveryone;
-    const makeItem = (comtOrder: PostSortOrder, e2eClass: St, isDefault?: true): RElm =>
-        ExplainingListItem({
-            active: layout.comtOrder === comtOrder || !layout.comtOrder && isDefault,
-            title: r.span({ className: e2eClass  },
-              (isDefault ? "Default: " : ''),
-              widgets.comtOrder_title(comtOrder)),
-            text: comtOrder_descr(comtOrder, forCat),
+    const makeItem = (itemComtOrder: PostSortOrder, e2eClass: St): RElm => {
+      let active: Bo;
+      let title: St | RElm;
+      const isDefault = itemComtOrder === PostSortOrder.Default;
+      if (!isDefault) {
+        active = itemComtOrder === layout.comtOrder;
+        title = widgets.comtOrder_title(itemComtOrder);
+      }
+      else {   // [def_disc_layout_title]
+        active = !layout.comtOrder;    // no: layout.comtNestingFrom === diagState.default.comtNestingFrom;
+        title = rFr({},
+                  "Default: ",
+                  r.span({ className: 'c_CmtOrdIt_InhDef_Val' },
+                    widgets.comtOrder_title(diagState.default.comtOrder)));
+      }
+      return ExplainingListItem({
+            active, //layout.comtOrder === comtOrder || !layout.comtOrder && isDefault,
+  //!layout.comtOrder && isDefault,
+            title: r.span({ className: e2eClass  }, title),
+            text: comtOrder_descr(itemComtOrder, diagState.default.comtOrderFrom),
             onSelect: () => {
-              diagState.onSelect({ ...layout, comtOrder });
+              diagState.onSelect({ ...layout, comtOrder: itemComtOrder });
               close();
             } });
+    }
 
-    defaultItem = makeItem(diagState.default.comtOrder, '', true);
+    defaultItem = makeItem(PostSortOrder.Default, '');
     bestFirstItem = makeItem(PostSortOrder.BestFirst, '');
     oldestFirstItem = makeItem(PostSortOrder.OldestFirst, '');
     newestFirstItem = makeItem(PostSortOrder.NewestFirst, '');
-    newestThenBestItem = makeItem(PostSortOrder.NewestThenBestFirst, '');
+    newestThenBestItem = makeItem(PostSortOrder.NewestThenBest, '');
+    newestThenOldestItem = makeItem(PostSortOrder.NewestThenOldest, '');
   }
 
   return (
@@ -98,26 +114,50 @@ const DiscLayoutDiag = React.createFactory<{}>(function() {
                 // And another is for oneself only. Therefore, good with
                 // different dialog titles:
                 forEveryone ? `Change comments sort order for everyone:`
-                              : `Sort by:`)),
+                              : `Sort comments below by:`)),
         defaultItem,
         bestFirstItem,
         oldestFirstItem,
         newestFirstItem,
-        newestThenBestItem));
+        newestThenBestItem,
+        newestThenOldestItem));
 });
 
 
-function comtOrder_descr(comtOrder: PostSortOrder, forCat: Bo): St | N {
+function comtOrder_descr(comtOrder: PostSortOrder, inheritedFrom: Ref): St | RElm | N {
   // 0I18N here; this is for staff.
   switch (comtOrder) {
     case PostSortOrder.Default:
-      return forCat ? "The default, in this category" : null;
-    case PostSortOrder.NewestThenBestFirst:
-      return "Replies to the Original Post are sorted by newest-first, " +
-          "and replies to the replies by popular-first. This can be nice " +
+      let fromWhere = '';
+      if (inheritedFrom.startsWith('pageid:')) fromWhere = ", for this page";
+      if (inheritedFrom.startsWith('catid:')) fromWhere = ", inherited from a category";
+      if (inheritedFrom.startsWith('sstg:')) fromWhere = ", inherited from the site settings";
+      if (inheritedFrom.startsWith('BuiltIn')) fromWhere = '';
+      // UX COULD write "Category [Cat Name]" instead of just `cat:1234`.
+      return rFr({},
+              `The default${fromWhere}. `, r.small({}, `(${inheritedFrom})`));
+
+    case PostSortOrder.BestFirst:
+      return "Comments many have liked, in comparison to how many have read them, " +
+            "are shown first.";
+
+    case PostSortOrder.NewestFirst:
+      return "The most recently posted comments are shown first.";
+
+    case PostSortOrder.NewestThenBest:
+      return "\"Lightweight blog\". Replies to the Original Post are sorted by " +
+          "newest-first, and replies to the replies by popular-first. This can be nice " +
           "if you post status updates as comments — the most recent update, " +
           "appears at the top, with replies sorted popular-first.";
-    default: return null;
+
+    case PostSortOrder.NewestThenOldest:
+      return "\"Threaded chat.\" Replies to the Original Post are sorted by newest-first, " +
+          "and replies to the replies by oldest-first. This can work like " +
+          "a threaded chat, just that the top level 'chat' messages are " +
+          "sorted most-recent-first, so you scroll down to see the older messages.";
+
+    default:
+      return null;
   }
 }
 

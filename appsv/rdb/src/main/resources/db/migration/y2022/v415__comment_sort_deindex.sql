@@ -6,6 +6,18 @@
 -- orig post votes?
 -- other votes
 
+create domain i16_nz_d as smallint constraint i16gz_c_nz check (value <> 0);
+create domain i32_nz_d as smallint constraint i32gz_c_nz check (value <> 0);
+create domain i64_nz_d as bigint   constraint i64gz_c_nz check (value <> 0);
+
+create domain comt_order_d i16_nz_d;
+-- For now. Later, maybe almost anything will be allowed — a nibble-field,
+-- where each nibble is the sort order of replies of a certain depth.
+-- See: [ComtSortOrder], in client/types-and-const-enums.ts.
+-- But ComtSortOrder.Default = 0 is never saved in the database.
+alter  domain comt_order_d add
+   constraint comt_order_d_c_in check (value in (1, 2, 3, 18, 48));
+
 create domain max_nesting_d i16_d;
 alter  domain max_nesting_d add
    constraint max_nesting_d_c_eq_m1_or_gtz check (value = -1 or value >= 1);
@@ -13,12 +25,13 @@ alter  domain max_nesting_d add
    constraint max_nesting_d_c_lte100 check (value <= 100);
 
 -- Later, instead in: disc_view_t, see [disc_props_view_stats]
-alter table pages3      add column comt_order_c i32_d;
+alter table pages3      add column comt_order_c   comt_order_d;
 alter table pages3      add column comt_nesting_c max_nesting_d;
 
 -- The defaut for the pages in a cat and its sub cats.
-alter table categories3 add column comt_order_c i32_d;
+alter table categories3 add column comt_order_c   comt_order_d;
 alter table categories3 add column comt_nesting_c max_nesting_d;
+
 
 -- De-prioritizes this page (or sub thread) among the search results.
 -- Say, a question or idea about something, before there were any docs
@@ -60,7 +73,7 @@ alter table categories3 add column comt_nesting_c max_nesting_d;
 -- 0b0110 0110  de-prio page and comments medium much
 --          = 102
 
-create domain index_prio_d i16_d;
+create domain index_prio_d i16_nz_d;
 alter  domain index_prio_d add
    constraint index_prio_d_c_eq102 check (value = 102);
 

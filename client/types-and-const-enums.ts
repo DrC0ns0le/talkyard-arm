@@ -171,11 +171,36 @@ const enum TopicFilters {
 }
 
 
-const enum ThingType {
+// Also see type FindWhat in tests/e2e-wdio7/pub-api.ts. [ty_things_types]
+//
+const enum ThingType {  // or RENAME to TaggableThingType?
+  // How was I thinking? These numbers? Some kind of bitmasks, hmm.
+  // Pats = 1 + 2 + 4 = guests, users, groups (but which order?).
   Pats = 7,
+  // Posts = Orig Posts (pages) + comments + ...what? + hmm. 32 + 16 + 8 = 56
   Posts = 56,
-  All = Pats + Posts,
+  // And: Post tags = 64? Pat tags = 128?
+  // And cats 256, then? For now.
+  //Cats = 256,
+
+  All = Pats + Posts,  // RENAME to AllThatCanBeTagged
 }
+
+
+/*
+const enum AllThingTypes {
+  //Pats = 7,
+  // 8  = meta posts (comments)
+  // 16 = comments by pats
+  // 32 = OrigPost = Pages,
+  Pages    = 32,  // ?
+  //Posts = 56,
+  // And: Post tags = 64? Pat tags = 128?
+  // And cats 256, then? For now.
+  Cats = 256,
+} */
+
+
 
 const enum No {
   PageIdSt = '0',
@@ -449,7 +474,7 @@ const InfiniteNesting: NestingDepth = -1;  // sync with Scala
 /// is used, and if unspecified there too, then, the site settings,
 /// or OldestFirst if unspecified everywhere.
 ///
-const enum PostSortOrder {  // rename to ComtSortOrder? Since not for orig post and title post.
+const enum PostSortOrder {  // rename to [ComtSortOrder]? Since not for orig post and title post.
   Default = 0,   // Inherit from parent category
   BestFirst = 1, // Q&A sites, Reddit, StackOverflow
   NewestFirst = 2,
@@ -460,8 +485,9 @@ const enum PostSortOrder {  // rename to ComtSortOrder? Since not for orig post 
   //ProblematicFirst = _,
   //Random = _
   //BestThenOldest = BestFirst + (OldestFirst << 4),  // StackOverflow, if max nesting = 2
-  NewestThenBestFirst = NewestFirst + (BestFirst << 4),
-  //NewestThenOldestFirst = NewestFirst + (OldestFirst << 4), // Facebook style, if max nesting 2
+  NewestThenBest = NewestFirst + (BestFirst << 4),  // == 18
+  // New flavor of theraded chat? Also, is what FB sometimes uses, but not for chatting.
+  NewestThenOldest = NewestFirst + (OldestFirst << 4),  // = 48
 }
 
 const enum ProgressLayout {
@@ -588,10 +614,11 @@ const enum HostRole {
 }
 
 
-const enum LayoutFor {
+const enum LayoutFor {   // or maybe ..From?
   PageWithTweaks = 1,
   PageNoTweaks   = PageWithTweaks + 1,
-  Ancestors      = PageNoTweaks + 1,
+  Ancestors      = PageNoTweaks + 1,   // RENAME to Cats?
+  SiteSettings   = Ancestors + 1,
 }
 
 

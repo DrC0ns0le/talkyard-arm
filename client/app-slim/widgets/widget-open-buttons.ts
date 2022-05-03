@@ -31,14 +31,6 @@ const r = ReactDOMFactories;
 
 export const DiscLayoutDropdownBtn = React.createFactory<DiscLayoutDropdownBtnProps>(
         function(props: DiscLayoutDropdownBtnProps) {
-    /*
-  const layout = {
-    comtOrder: props.page.comtOrder,
-    comtNesting: props.page.comtNesting,
-  };
-
-  const defaultLayout = page_deriveDiscProps(props.page, props.store, props.layoutFor);
-  */
 
   // If we're A) altering the page layout, e.g. the comments sort order,
   // but not saving server side, then,
@@ -50,10 +42,14 @@ export const DiscLayoutDropdownBtn = React.createFactory<DiscLayoutDropdownBtnPr
   // So, the "parent" layout is +1:
   const layoutForParent = props.layoutFor + 1;
 
-  const layout = props.page
+  const thisLayoutProps = discProps_pluckFrom(props.page || props.cat);
+  // Harmless UX BUG: page tweaks not included. Could merge from props.store.curPageTweaks,
+  // but only if layoutFor === LayoutFor.PageWithTweaks, right.
+
+  const thisLayout = props.page
           ? page_deriveLayout(props.page, props.store, props.layoutFor)
           : cat_deriveLayout(props.cat, props.store, props.layoutFor);
-  const defaultLayout = props.page
+  const parentsLayout = props.page
           ? page_deriveLayout(props.page, props.store, layoutForParent)
           : cat_deriveLayout(props.cat, props.store, layoutForParent);
 
@@ -61,22 +57,29 @@ export const DiscLayoutDropdownBtn = React.createFactory<DiscLayoutDropdownBtnPr
       Button({ className: 'esTopicType_dropdown', onClick: (event) => {
           const atRect = cloneEventTargetRect(event);
           morebundle.openDiscLayoutDiag({
-              atRect, layout, default: defaultLayout,
+              atRect, layout: thisLayoutProps,
+              default: parentsLayout,
               forCat: props.forCat, forEveryone: props.forEveryone, onSelect: props.onSelect });
         }},
-        comtOrder_title(layout.comtOrder), ' ', r.span({ className: 'caret' })));
+        comtOrder_title(thisLayout.comtOrder), ' ', r.span({ className: 'caret' })));
 });
+
 
 
 export function comtOrder_title(comtOrder: PostSortOrder): St {
   switch (comtOrder) {
+    //case PostSortOrder.Default:
+    //  Not supposed to happen. Instead the DiscLayoutDiag constructs a list item
+    //  for the admins. [def_disc_layout_title]
     case PostSortOrder.OldestFirst: return "Oldest first";  // I18N here and below
     case PostSortOrder.NewestFirst: return "Newest first";
     case PostSortOrder.BestFirst: return "Popular first";
-    case PostSortOrder.NewestThenBestFirst: return "Newest then Popular";
+    case PostSortOrder.NewestThenBest: return "Newest then Popular";
+    case PostSortOrder.NewestThenOldest: return "Newest then Oldest";
   }
   return `Bad: ${comtOrder} TyECMTORDR`;
 }
+
 
 
 //------------------------------------------------------------------------------

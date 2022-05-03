@@ -1269,10 +1269,17 @@ interface DiscPropsSource {
   comtNesting?: NestingDepth;
 }
 
-// RENAME to DiscLayoutDerived?
+// RENAME to DiscLayoutDerived?  There's an interface Layout too (below) merging all layouts.
 interface DiscPropsDerived {
   comtOrder: PostSortOrder;
-  comtNesting: NestingDepth;  // not yet in use [max_nesting]
+  // Says what thing (e.g. the current page, or the parent category) the comtOrder
+  // layout setting is from, so the edit-layout dialog can tell the admin
+  // where the default value is from, in case the admin would want to edit the
+  // default setting. And ... makes it simpler for the Ty devs to troubleshoot any
+  // layout inheritance bugs.
+  comtOrderFrom: Ref; // LayoutFor;
+  comtNesting: NestingDepth;   // not yet in use [max_nesting]
+  comtNestingFrom: Ref; // LayoutFor;  //
 }
 
 // And extends TopicListLayout, KnowledgeBaseLayout etc, all layouts.
@@ -2205,7 +2212,7 @@ interface DiscLayoutDropdownBtnProps {
   cat?: Cat;    // ...or.
   store: Store;
   layoutFor: LayoutFor;
-  forCat?: Bo;
+  forCat?: Bo;  // isn't this.cat above enough?
   forEveryone?: Bo;
   onSelect: (newLayout: DiscPropsSource) => Vo;
 }
@@ -2214,7 +2221,7 @@ interface DiscLayoutDropdownBtnProps {
 interface DiscLayoutDiagState {
   atRect: Rect;
   layout: DiscPropsSource;
-  default: DiscPropsSource;
+  default: DiscPropsDerived; // ? DiscPropsSource;
   forCat?: Bo;
   forEveryone?: Bo;
   onSelect: (newLayout: DiscPropsSource) => Vo ;

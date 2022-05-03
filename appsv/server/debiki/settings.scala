@@ -442,14 +442,19 @@ object AllSettings {
     val selectTopicType = true
     val showAuthorHow: ShowAuthorHow = ShowAuthorHow.FullNameThenUsername
     val watchbarStartsOpen = true
+    // ----------------------------
+    // These defaults should be specified here instead?  [appsv_layout_defs]
+    // But then they wouldn't be accessible to the core module. So for now they're there,
+    // instead.
     val discussionLayout: DiscussionLayout = DiscussionLayout.Default
-    val discPostSortOrder: PostSortOrder = PostSortOrder.Default
+    val discPostSortOrder: PostSortOrder = PostsOrderNesting.Default.sortOrder
     val discPostNesting: NestingDepth = PostsOrderNesting.Default.nestingDepth
     val progressLayout: ProgressLayout = ProgressLayout.Default
     val embComSortOrder: PostSortOrder = PostSortOrder.DefaultForEmbComs
     val embComNesting: NestingDepth = PostsOrderNesting.Default.nestingDepth
     val origPostReplyBtnTitle: String = ""  // will then use the i18n field
     val origPostVotes: OrigPostVotes = OrigPostVotes.Default
+    // ----------------------------
     val enableDisagreeVote: Bo = true
     val requireApprovalIfTrustLte = TrustLevel.Stranger
     val reviewAfterIfTrustLte = TrustLevel.Stranger

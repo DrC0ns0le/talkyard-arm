@@ -961,9 +961,10 @@ function updatePost(post: Post, pageId: PageId, isCollapsing?: boolean) {
       else {
         childNrsSorted.push(post.nr);
       }
+      const sortOrder = layout_sortOrderForChildsOf(layout, parentPost);
       sortPostNrsInPlace(
-            childNrsSorted, page.postsByNr,
-            layout.comtOrder);
+            childNrsSorted, page.postsByNr, sortOrder);
+            // layout.comtOrder);
          // page.discPostSortOrder
     }
   }
@@ -984,8 +985,9 @@ function updatePost(post: Post, pageId: PageId, isCollapsing?: boolean) {
   //  ... What? There is. But it's still not in use here, for embedded comments.)
   if (!post.parentNr && post.nr != BodyNr && post.nr !== TitleNr) {
     page.parentlessReplyNrsSorted = findParentlessReplyIds(page.postsByNr);
+    const sortOrder = layout_sortOrderForChildsOf(layout, { nr: BodyNr });
     sortPostNrsInPlace(
-        page.parentlessReplyNrsSorted, page.postsByNr, layout.comtOrder);
+        page.parentlessReplyNrsSorted, page.postsByNr, sortOrder); // layout.comtOrder);
                                                     // page.discPostSortOrder);
   }
 
@@ -1265,12 +1267,21 @@ function findParentlessReplyIds(postsByNr): number[] {
 
 
 
-function store_relayoutPageInPlace(store, page, layout: DiscPropsSource) {
+function store_relayoutPageInPlace(store, page, layout: DiscPropsDerived) {
   _.each(page.postsByNr, (post: Post) => {
-    const sortOrder =
-        layout.comtOrder !== PostSortOrder.NewestThenBestFirst
-            ?  layout.comtOrder
-            : (post.nr === BodyNr ? PostSortOrder.NewestFirst : PostSortOrder.BestFirst);
+    const sortOrder = layout_sortOrderForChildsOf(layout, post);
+    /*
+    let sortOrder: PostSortOrder;
+    switch(layout.comtOrder) {
+      case PostSortOrder.NewestThenBest:
+        sortOrder = post.nr === BodyNr ? PostSortOrder.NewestFirst : PostSortOrder.BestFirst;
+        break;
+      case PostSortOrder.NewestThenOldest:
+        sortOrder = post.nr === BodyNr ? PostSortOrder.NewestFirst : PostSortOrder.OldestFirst;
+        break;
+      default:
+        sortOrder = layout.comtOrder;
+    } */
     sortPostNrsInPlace(
           post.childNrsSorted, page.postsByNr, sortOrder);
   });
@@ -1666,6 +1677,12 @@ function patchTheStore(storePatch: StorePatch) {  // REFACTOR just call directly
       ...store.curPageTweaks,
       ...storePatch.curPageTweaks,
     };
+    if (store.curPageTweaks.comtOrder === PostSortOrder.Default) {
+      // The Default value supposed to be remembered — just means that we should
+      // delete any comtOrder value, so the parent category's or site settings value
+      // gets used instead.
+      delete store.curPageTweaks.comtOrder;
+    }
   }
 
   // If we just posted the very first reply on an embedded discussion, a page for the discussion

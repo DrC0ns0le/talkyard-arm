@@ -718,24 +718,32 @@ export function pat_mayEditTags(me: Me, ps: { forPost?: Post, forPat?: Pat,
 
 
 export function discProps_pluckFrom(what: DiscPropsSource | SettingsVisibleClientSide)
-      : DiscPropsDerived {
+      : DiscPropsSource {
   const source = what as DiscPropsSource;
   const settings = what as SettingsVisibleClientSide;
-  return {
-    // Sync these defaults w Scala: AllSettings [8L4KWU02]
-    comtOrder: source.comtOrder || settings.discPostSortOrder || PostSortOrder.BestFirst,
-    comtNesting: source.comtNesting || settings.discPostNesting || -1,
-  }
+
+  // Don't set any field to undefined. [unintened_undefined_bug]
+  const result: DiscPropsSource = {};
+
+  const comtOrder   = source.comtOrder   || settings.discPostSortOrder;
+  if (comtOrder) result.comtOrder = comtOrder;
+
+  const comtNesting = source.comtNesting || settings.discPostNesting;
+  if (comtNesting) result.comtNesting = comtNesting;
+
+  return result;
 }
+
 
 /// Merges other into self; mutates self (_inPl = in-place).
 ///
 export function discProps_mergeWith_inPl(self: DiscPropsSource, other: DiscPropsSource) {
   // Same as: DiscPropsMerged.mergeWith() in Scala.  [disc_props_js_scala]
-  if (!self.comtOrder) {
+  // Don't set any field to undefined. [unintened_undefined_bug]
+  if (!self.comtOrder && other.comtOrder) {
     self.comtOrder = other.comtOrder;
   }
-  if (!self.comtNesting) {
+  if (!self.comtNesting && other.comtNesting) {
     self.comtNesting = other.comtNesting;
   }
 }
@@ -1563,6 +1571,24 @@ let numTagTypeMissingWarnings = 0;
 
 
 
+// Layout
+//----------------------------------
+
+
+export function layout_sortOrderForChildsOf(layout: DiscPropsDerived, post: { nr: PostNr }) {
+  switch(layout.comtOrder) {
+    case PostSortOrder.NewestThenBest:
+      return post.nr === BodyNr ? PostSortOrder.NewestFirst : PostSortOrder.BestFirst;
+    case PostSortOrder.NewestThenOldest:
+      return post.nr === BodyNr ? PostSortOrder.NewestFirst : PostSortOrder.OldestFirst;
+    default:
+      return layout.comtOrder;
+  }
+}
+
+
+
+
 // Page
 //----------------------------------
 
@@ -1584,14 +1610,28 @@ export function cat_deriveLayout(cat: Cat, store: Store, layoutFor: LayoutFor)
 }
 
 
+/// Layout props can be specified on a specific page, a category,
+/// or whole site settings. Layout props set on a cat or the whole site, are
+/// inherited by things inside (sub cats, and pages in those cats).
+///
+/// The most specific props, have precedence — that is, props set on the
+/// page or cat itself, override parent cat props and site settings.
+/// If unspecified everywhere, Ty's built-in defaults gets used.
+///
 function deriveLayoutImpl(page: Page, cat: Cat, store: Store, layoutFor: LayoutFor)
-      : DiscPropsDerived {   // RENAME to DiscLayoutDerived?
-  const anyTweaks = layoutFor === LayoutFor.PageWithTweaks
-                    && page && page.pageId === store.currentPageId ?
-          store.curPageTweaks : undefined;
+      : DiscPropsDerived {
+
+  // ----- The page/cat itself
 
   let discProps: DiscPropsSource = layoutFor === LayoutFor.Ancestors ?
         {} : discProps_pluckFrom(page || cat);
+
+  const selfRef = () => page ? `pageid:${page.pageId}` : `catid:${cat.id}`;
+
+  let comtOrderFrom   = discProps.comtOrder && selfRef();
+  let comtNestingFrom = discProps.comtNesting && selfRef();
+
+  // ----- Ancestor cats
 
   // Start with the parent cat, since it's the most specific cat. Then the
   // grandparent, and so on. Finally, the whole site settings.
@@ -1601,16 +1641,53 @@ function deriveLayoutImpl(page: Page, cat: Cat, store: Store, layoutFor: LayoutF
   const ancCatId = page ? page.categoryId : cat.parentId;
   const ancCats: Cat[] = store_ancestorCatsCurFirst(store, ancCatId);
 
-  for (const cat of ancCats)
+  for (const cat of ancCats) {
     discProps_mergeWith_inPl(discProps, cat);
+    const catRef = () => `catid:${cat.id}`;
+    if (!comtOrderFrom && discProps.comtOrder) comtOrderFrom = catRef();
+    if (!comtNestingFrom && discProps.comtNesting) comtNestingFrom = catRef();
+  }
 
-  const settingsDiscProps: DiscPropsDerived = discProps_pluckFrom(store.settings);
-  let finalProps: DiscPropsDerived = { ...settingsDiscProps, ...discProps };
+  // ----- Site settings
 
-  if (anyTweaks)
-    finalProps = { ...finalProps, ...anyTweaks };
+  const settingsDiscProps: DiscPropsSource = discProps_pluckFrom(store.settings);
+  discProps = { ...settingsDiscProps, ...discProps };
 
-  return finalProps;
+  // sstg = setting, see docs/abbreviations.txt.
+  if (!comtOrderFrom && discProps.comtOrder) comtOrderFrom = 'sstg:comtOrder';
+  if (!comtNestingFrom && discProps.comtNesting) comtNestingFrom = 'sstg:comtNesting';
+
+  // ----- Hardcoded defaults
+
+  if (!discProps.comtOrder) {
+    discProps.comtOrder = PostSortOrder.OldestFirst;
+    comtOrderFrom = `BuiltIn`;
+  }
+
+  if (!discProps.comtNesting) {
+    discProps.comtNesting = -1;
+    comtNestingFrom = `BuiltIn`;
+  }
+
+  // ----- Temp tweaks
+
+  const anyTweaks = layoutFor === LayoutFor.PageWithTweaks
+                    && page && page.pageId === store.currentPageId ?
+          store.curPageTweaks : undefined;
+
+  if (anyTweaks) {
+    discProps = { ...discProps, ...anyTweaks };
+    if (anyTweaks.comtOrder) comtOrderFrom = `CurPageTweaks`;
+    if (anyTweaks.comtNesting) comtNestingFrom = `CurPageTweaks`;
+  }
+
+  const result = {
+    ...discProps,
+    comtOrderFrom,
+    comtNestingFrom,
+  };
+
+  return result as DiscPropsDerived;
 }
 
 

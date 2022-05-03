@@ -416,9 +416,9 @@ class JsonMaker(dao: SiteDao) {
       "forumSearchBox" -> JsNum32OrNull(page.meta.forumSearchBox),
       "forumMainView" -> JsNum32OrNull(page.meta.forumMainView),
       "forumCatsTopics" -> JsNum32OrNull(page.meta.forumCatsTopics),
-      "discussionLayout" -> JsNumber(siteSettings.discussionLayout.toInt),
-      "discPostSortOrder" -> JsNumber(page.parts.postsOrderNesting.sortOrder.toInt),
-      "discPostNesting" -> JsNumber(page.parts.postsOrderNesting.nestingDepth),
+      // "discussionLayout" -> JsNumber(siteSettings.discussionLayout.toInt),
+      // "discPostSortOrder" -> JsNumber(page.parts.postsOrderNesting.sortOrder.toInt),
+      // "discPostNesting" -> JsNumber(page.parts.postsOrderNesting.nestingDepth),
       "progressLayout" -> JsNumber(siteSettings.progressLayout.toInt),
       // Not needed, discPostSortOrder and discPostNesting in use:
       // "embComSortOrder" -> ..

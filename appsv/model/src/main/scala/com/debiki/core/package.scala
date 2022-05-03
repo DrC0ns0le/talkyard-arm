@@ -1048,11 +1048,12 @@ package object core {
   object PostsOrderNesting {
     val InfiniteNesting: NestingDepth = -1  // sync with Typescript
 
+    // Move these to appsv/server/debiki/settings.scala?  [appsv_layout_defs]
     val Default: PostsOrderNesting =
-      PostsOrderNesting(PostSortOrder.Default, InfiniteNesting)
+      PostsOrderNesting(PostSortOrder.OldestFirst, InfiniteNesting)  // was: Default
 
     val DefaultForEmbComs: PostsOrderNesting =
-      PostsOrderNesting(PostSortOrder.DefaultForEmbComs, InfiniteNesting)
+      PostsOrderNesting(PostSortOrder.BestFirst, InfiniteNesting)  // was: DefaultForEmbComs
 
   }
 
@@ -1076,12 +1077,12 @@ package object core {
     // Also: ControversialFirst — both many Likes and Disagrees
     //       ProblematicFirst  — for mods, to see flagged and unwanted things first
 
-    case object Default extends PostSortOrder(0, false) // change to OldestFirst?
+    case object Default extends PostSortOrder(0, false) ; RENAME // to Inherit  ?
     case object BestFirst extends PostSortOrder(BestFirstNibble, false) with ComtOrderAtDepth
     case object NewestFirst extends PostSortOrder(NewestFirstNibble, true) with ComtOrderAtDepth
     case object OldestFirst extends PostSortOrder(OldestFirstNibble, true) with ComtOrderAtDepth
 
-    case object NewestThenBestFirst extends PostSortOrder(
+    case object NewestThenBest extends PostSortOrder(
       NewestFirstNibble + (BestFirstNibble << 4), true) {
 
       override def atDepth(depth: i32): ComtOrderAtDepth =
@@ -1089,6 +1090,15 @@ package object core {
         else BestFirst
     }
 
+    case object NewestThenOldest extends PostSortOrder(
+      NewestFirstNibble + (OldestFirstNibble << 4), true) {
+
+      override def atDepth(depth: i32): ComtOrderAtDepth =
+        if (depth <= 1) NewestFirst
+        else OldestFirst
+    }
+
+    // Move to the default settings file insetad. [appsv_layout_defs]
     val DefaultForEmbComs: PostSortOrder = BestFirst
 
     // Maybe: Random?
@@ -1106,7 +1116,7 @@ package object core {
     // Also see [LIKESCORE].
     //
     // /* Shows a few new posts first, then, below, post sorted by popularity. */
-    // No, skip these. Use nibbles instead — see NewestThenBestFirst above.
+    // No, skip these. Use nibbles instead — see NewestThenBest above.
     // object NewAndBestFirst extends PostsSortOrder(5)
     // object RandomAndBestFirst extends PostsSortOrder(6)
     // object NewRandomAndBestFirst extends PostsSortOrder(7)
@@ -1116,21 +1126,13 @@ package object core {
       case BestFirst.IntVal => BestFirst
       case NewestFirst.IntVal => NewestFirst
       case OldestFirst.IntVal => OldestFirst
-      case NewestThenBestFirst.IntVal => NewestThenBestFirst
+      case NewestThenBest.IntVal => NewestThenBest
+      case NewestThenOldest.IntVal => NewestThenOldest
       case _ => return None
     })
 
-    def fromOptVal(anyValue: Opt[i32]): Opt[PostSortOrder] = anyValue flatMap fromInt
-    /*
-      // case Inherit.IntVal => Inherit
-      case BestFirst.IntVal => BestFirst
-      case NewestFirst.IntVal => NewestFirst
-      case OldestFirst.IntVal => OldestFirst
-      //case TrendingFirst.IntVal => TrendingFirst
-      case NewestThenBestFirst.IntVal => NewestThenBestFirst
-      //case BestThenNewestFirst.IntVal => BestThenNewestFirst
-      case _ => return None
-    } */
+    def fromOptVal(anyValue: Opt[i32]): Opt[PostSortOrder] =
+      anyValue flatMap fromInt
   }
 
 
