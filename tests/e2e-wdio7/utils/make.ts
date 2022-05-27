@@ -59,6 +59,7 @@ function makeEmptySite(ps: { okInitEarly?: boolean } = {}): SiteData {
   pages: [],
   pagePaths: [],
   posts: [],
+  postActions: [],
   emailsOut: [],
   notifications: [],
   uploads: [],

@@ -9,6 +9,7 @@ import * as _ from 'lodash';
 import c from '../test-constants';
 import { dieIf } from './log-and-die';
 
+import { TestVoteType } from '../test-types2';
 
 export function makeSiteOwnedByOwenBuilder() {
   return buildSite();
@@ -171,6 +172,11 @@ export function buildSite(site: SiteData | U = undefined, ps: { okInitEarly?: bo
 
     addPost: function(testPostData: NewTestPost) {
       site.posts.push(make.post(testPostData));
+    },
+
+
+    addVote: function(testVoteData: NewTestVote) {
+      site.postActions.push({ ...testVoteData, actionType: TestVoteType.Like });
     },
 
 

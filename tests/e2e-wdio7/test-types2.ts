@@ -200,7 +200,7 @@ interface SiteData2 {   // [3SD5PB7]
   permsOnPages: any[]; // PermsOnPage[];
   drafts: any[];
   posts: TestPost[];
-  postActions: any[];
+  postActions: TestPostAction[];
   links: any[];
   emailsOut: any;
   notifications: any[];
@@ -587,6 +587,25 @@ interface TestPost {  // later: try to unify with Post?
   numUnwantedVotes: number;
   postType?: number;
   prevRevNr?: number;
+}
+
+
+interface NewTestVote {
+  postId: PostId;
+  pageId: PageId;
+  postNr: PostNr;
+  doneAt: WhenMs;
+  doerId: PatId;
+  voteType: Nr; // TestVoteType;
+  //actionType: Nr; // where's this defined?: ActionType;
+}
+
+
+export const TestVoteType = {
+  Like: 41,
+  Wrong: 42,
+  Bury: 43,
+  Unwanted: 44,
 }
 
 

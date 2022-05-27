@@ -1414,6 +1414,14 @@ case class SitePatcher(globals: debiki.Globals) {
         tx.insertPostAction(postAction)
       }
 
+      siteData.postVotes foreach { vote =>
+        val post = siteData.posts.find(p => p.pageId == vote.pageId && p.nr == vote.postNr) getOrElse {
+          throwBadRequest("TyE0POST2VOTE", s"Trying to insert a vote on page id '${vote.pageId}' post nr ${
+                      vote.postNr} but there's no such post")
+        }
+        tx.insertPostAction(vote.toPostAction(postId = post.id))
+      }
+
       siteData.links foreach { link =>
         tx.upsertLink(link)
       }

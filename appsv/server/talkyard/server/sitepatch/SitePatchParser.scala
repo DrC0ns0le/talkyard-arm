@@ -173,7 +173,7 @@ case class SitePatchParser(context: TyContext) {
 
     val (permsOnPagesJson, pagesJson, pathsJson, pageIdsByAltIdsJson,
         pagePopularityScoresJson, pageParticipantsJson,
-        categoriesJson, draftsJson, postsJson, postActionsJson, linksJson, reviewTasksJson,
+        categoriesJson, draftsJson, postsJson, postActionsJson, postVotesJson, linksJson, reviewTasksJson,
         webhooksJson,
         isTestSiteOkDelete, isTestSiteIndexAnyway) =
       try {
@@ -187,6 +187,7 @@ case class SitePatchParser(context: TyContext) {
           readJsArray(bodyJson, "drafts", optional = true),
           readJsArray(bodyJson, "posts", optional = true),
           readJsArray(bodyJson, "postActions", optional = true),
+          readJsArray(bodyJson, "postVotes", optional = true),
           readJsArray(bodyJson, "links", optional = true),
           readJsArray(bodyJson, "reviewTasks", optional = true),
           readJsArray(bodyJson, "webhooks", optional = true),
@@ -397,12 +398,23 @@ case class SitePatchParser(context: TyContext) {
             in the 'posts' list: $error, json: $json"""))
     }
 
+    // Old: Flags and votes in the same table. ------------
+    // Maybe a postActionsByNr would be helpful, when constructing tests?
+    // Either specify post id or nr?
     val postActions: Seq[PostAction] = postActionsJson.value.toVector.zipWithIndex map { case (json, index) =>
       readPostActionOrBad(json, isE2eTest).getOrIfBad(error =>
         throwBadReq(
           "TyE205KRU", o"""Invalid PostActio json at index $index in
               the 'postActions' list: $error, json: $json"""))
     }
+    // Newer: Treat flags & votes separately. -------------
+    val postVotesMaybeId: Seq[PostVoteMaybePostId] = postVotesJson.value.toVector.zipWithIndex map { case (json, ix) =>
+      readPostVoteOrBad(json, isE2eTest).getOrIfBad(error =>
+        throwBadReq(
+          "TyE205KRU", o"""Invalid PostActio json at index $ix in
+              the 'postVotesMaybeId' list: $error, json: $json"""))
+    }
+    // ----------------------------------------------------
 
     val links = linksJson.value.toVector.zipWithIndex map { case (json, index) =>
       Try(JsX.parseJsLink(json, IfBadThrowBadJson)).recover({ case ex: BadJsonEx =>
@@ -444,7 +456,8 @@ case class SitePatchParser(context: TyContext) {
       categoryPatches.toVector, categories.toVector,
       pages, paths, pageIdsByAltIds, pagePopularityScores,
       pageNotfPrefs, pageParticipants,
-      drafts, posts, postActions, links, permsOnPages, reviewTasks,
+      drafts, posts, postActions, postVotesMaybeId,
+      links, permsOnPages, reviewTasks,
       webhooks,
       isTestSiteOkDelete = isTestSiteOkDelete,
       isTestSiteIndexAnyway = isTestSiteIndexAnyway)
@@ -1559,6 +1572,34 @@ case class SitePatchParser(context: TyContext) {
     catch {
       case ex: IllegalArgumentException =>
         Bad(s"Bad json for post action for post id '$postId': ${ex.getMessage}")
+    }
+  }
+
+
+  def readPostVoteOrBad(jsValue: JsValue, isE2eTest: Bo): PostVoteMaybePostId Or ErrMsg = {
+    val jsObj = asJsObject(jsValue, "vote")
+
+    val postNr = try parseInt32(jsObj, "postNr") catch {
+      case ex: IllegalArgumentException =>
+        return Bad(s"Invalid post vote post nr: " + ex.getMessage)
+    }
+
+    try {
+      val actionTypeInt  = readInt(jsObj, "actionType")
+      val voteType  = PostsSiteDaoMixin.postActionTypeIntToOptVoteType(actionTypeInt) getOrElse {
+        return Bad(s"A vote on post nr $postNr: Not a vote type: $actionTypeInt")
+      }
+      Good(PostVoteMaybePostId(
+        // postId = None, // for now
+        pageId = readString(jsObj, "pageId"),
+        postNr = readInt(jsObj, "postNr"),
+        doneAt = readWhen(jsObj, "doneAt"),
+        voterId = readInt(jsObj, "doerId"),
+        voteType = voteType))
+    }
+    catch {
+      case ex: IllegalArgumentException =>
+        Bad(s"Bad json for vote on post nr $postNr: ${ex.getMessage}")
     }
   }
 

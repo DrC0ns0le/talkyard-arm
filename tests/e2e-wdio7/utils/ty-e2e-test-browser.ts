@@ -5691,6 +5691,10 @@ export class TyE2eTestBrowser {
         await this.waitForGone(this.metabar.__myName);  // later, move to above 'return',  [hide_authn_btns]
       },
 
+      openDiscLayout: async () => {
+        await this.waitAndClick('.esMetabar .e_DscLayB');
+      },
+
       openMetabar: async () => {
         await this.waitAndClick('.dw-page-notf-level');
         await this.waitForVisible('.esMB_Dtls_Ntfs_Lbl');
@@ -6571,6 +6575,11 @@ export class TyE2eTestBrowser {
           message: `Waiting for Change Page dialog to close`,
         });
         await this.waitUntilModalGone();
+      },
+
+      openDiscLayout: async () => {
+        await this.topic.openChangePageDialog();
+        await this.waitAndClick('.s_ChPgD .e_DscLayB');
       },
 
       closeTopic: async () => {
