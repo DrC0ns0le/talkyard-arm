@@ -39,7 +39,7 @@ export const DiscLayoutDropdownBtn = React.createFactory<DiscLayoutDropdownBtnPr
   }
   else {
     layoutSource = discProps_pluckFrom(props.cat);
-    if (props.layoutFor === LayoutFor.PageWithTweaks) {
+    if (props.layoutFor === LayoutFor.PageWithTweaks && props.store.curPageTweaks) {
       const tempLayoutTweaks = discProps_pluckFrom(props.store.curPageTweaks);
       layoutSource = { ...layoutSource, ...tempLayoutTweaks };
     }

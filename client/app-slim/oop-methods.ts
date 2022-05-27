@@ -719,6 +719,9 @@ export function pat_mayEditTags(me: Me, ps: { forPost?: Post, forPat?: Pat,
 
 export function discProps_pluckFrom(what: DiscPropsSource | SettingsVisibleClientSide)
       : DiscPropsSource {
+  // @ifdef DEBUG
+  dieIf(!what, `No 'what' [TyE70W3MR8M]`);
+  // @endif
   const source = what as DiscPropsSource;
   const settings = what as SettingsVisibleClientSide;
 
