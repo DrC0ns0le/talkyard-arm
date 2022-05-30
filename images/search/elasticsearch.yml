@@ -27,3 +27,4 @@ discovery.zen.minimum_master_nodes: 1
 
 action.auto_create_index: false
 
+discovery.type: single-node
