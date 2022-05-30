@@ -11,7 +11,7 @@ container_name="tye2ebrowser"
 
 # !! Update Chromedriver and FF driver in wdio.conf.ts too. [upd_chromedriver_ffdriver]
 # Not using — see  image_name  below instead.
-image_version="4.0.0-alpha-7-prerelease-20201009" # 3.141.59-20201010"
+image_version="4.0.0-20211111" # 3.141.59-20201010"
 #image_version="selenium/standalone-chrome:4.0.0-beta-4-prerelease-20210527"
 
 # Is 3.5.x and 4.0.0 Selenium Grid? Selenium Server? versions?
@@ -76,7 +76,7 @@ done
 
 # E.g.: selenium/standalone-chrome-debug
 #image_name="selenium/standalone-${browser_name}${dash_debug}:${image_version}"
-image_name="selenium/standalone-chrome:4.0.0-alpha-7-prerelease-20201009"
+image_name="seleniarm/standalone-chromium:4.0.0-20211111"
 #image_name="selenium/standalone-chrome :4.0.0-beta-4-prerelease-20210527"
 #image_name="selenium/standalone-$browser_name:4.0.0-beta-4-prerelease-20210604"
 #docker pull selenium/standalone-firefox:4.0.0-beta-4-prerelease-20210604
