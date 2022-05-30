@@ -1,4 +1,4 @@
-FROM denoland/deno:1.20.1
+FROM lukechannings/deno:v1.20.1
 
 # Nice to haves:
 RUN \

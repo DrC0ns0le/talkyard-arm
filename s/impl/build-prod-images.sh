@@ -93,7 +93,8 @@ function containers_running_test() {
   docker ps | tail -n +2 | grep -v registry | grep -v tye2ebrowser | grep -v tynodejs
 }
 
-if [ -n "`containers_running_test`" ]; then
+: ' DELETE THIS LINE
+if [-n "`containers_running_test`"]; then
   echo
   echo "Docker containers are running, PLEASE STOP THEM, thanks. Look:"
   echo
@@ -101,6 +102,7 @@ if [ -n "`containers_running_test`" ]; then
   echo
   die_if_in_script
 fi
+AND THIS LINE TO UNCOMMENT THIS BLOCK'
 
 
 # Build Docker images
