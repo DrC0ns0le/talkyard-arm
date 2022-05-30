@@ -388,7 +388,7 @@ services:
   #      --user mxsrvadm  --password pub-mxsr020  --admin
   # See:  https://github.com/matrix-org/synapse/tree/master/docker
   ty-it-mx-synapse:
-    image: matrixdotorg/synapse:latest
+    image: matrixdotorg/synapse:v1.53.0
          # matrixdotorg/synapse:v1.53.0
          # see:  https://hub.docker.com/r/matrixdotorg/synapse/tags
     restart: unless-stopped
