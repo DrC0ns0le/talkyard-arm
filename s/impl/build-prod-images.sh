@@ -93,7 +93,7 @@ function containers_running_test() {
   docker ps | tail -n +2 | grep -v registry | grep -v tye2ebrowser | grep -v tynodejs
 }
 
-if [ 1 ]; then
+if [ 0 ]; then
   echo
   echo "Docker containers are running, PLEASE STOP THEM, thanks. Look:"
   echo
