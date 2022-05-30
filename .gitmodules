@@ -177,3 +177,6 @@
 	url = https://github.com/debiki/ty-vendors.git
 	branch = ty-images-app-sbt-1.4.5
 	shallow = true
+[submodule "element-web"]
+	path = element-web
+	url = https://github.com/vector-im/element-web.git
