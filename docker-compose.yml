@@ -392,7 +392,7 @@ services:
          # matrixdotorg/synapse:v1.53.0
          # see:  https://hub.docker.com/r/matrixdotorg/synapse/tags
     restart: unless-stopped
-    command: bash -ic "chown 991:991 /data/media_store /data"
+    #command: /bin/bash -c "chown 991:991 /data/media_store /data"
     volumes:
       - ./volumes/matrix-synapse-data:/data
       - ./tests/int-w/matrix/homeserver.yaml:/data/homeserver.yaml
